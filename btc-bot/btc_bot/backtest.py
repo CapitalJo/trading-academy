@@ -18,6 +18,7 @@ import pandas as pd
 class Costs:
     fee_bps: float = 25.0       # per side. Alpaca crypto taker fee at the base tier is 0.25%
     slippage_bps: float = 5.0   # per side, on top of the fee
+    funding: bool = False       # perp venue: longs pay / shorts receive the 8h funding rate
 
 
 @dataclass
@@ -41,6 +42,8 @@ def run(f, sig, p, costs=Costs(), risk_per_trade=0.02, max_leverage=1.0, start_e
     o, h, l, c, a, rv = (f[k].to_numpy() for k in ("open", "high", "low", "close", "atr", "rvol"))
     idx = f.index
     bpy = pd.Timedelta(days=365) / (idx[1] - idx[0])
+    fr = (f["funding"].fillna(0).to_numpy() * ((idx[1] - idx[0]) / pd.Timedelta(hours=8))
+          if costs.funding and "funding" in f else np.zeros(len(f)))
     n = len(f)
     fee, slip = costs.fee_bps / 1e4, costs.slippage_bps / 1e4
     cash, qty, side = start_equity, 0.0, 0          # side: +1 long, -1 short, 0 flat
@@ -82,7 +85,9 @@ def run(f, sig, p, costs=Costs(), risk_per_trade=0.02, max_leverage=1.0, start_e
             close_pos(min(o[j], stop), idx[j], "stop")
         elif side < 0 and h[j] >= stop:
             close_pos(max(o[j], stop), idx[j], "stop")
-        # 3) mark to market at the close
+        # 3) funding accrual, then mark to market at the close
+        if side != 0 and fr[j]:
+            cash -= side * qty * c[j] * fr[j]
         eq[j] = cash + side * qty * c[j]
         if j == n - 1:
             break

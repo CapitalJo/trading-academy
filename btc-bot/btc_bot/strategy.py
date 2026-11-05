@@ -1,5 +1,12 @@
 """
-"Flow Regime" strategy -- long/flat by default (Alpaca crypto spot cannot be shorted).
+"Flow Regime" strategy -- trades bull and bear regimes, pauses in consolidation.
+
+Regimes (computed at each 4h close):
+  BULL   price above its 200-bar EMA and ADX(14) >= 20          -> long when buy-side flow confirms
+  BEAR   price below the EMA, EMA falling, and ADX >= 20       -> short when sell-side flow confirms
+                                                                   (cash instead on venues that can't short)
+  RANGE  anything else (ADX < 20 = consolidation)              -> no new entries; open trades keep their
+                                                                   normal flow/stop exits
 
 Research behind it (see research.py / REPORT.md):
   * Multi-day taker-flow imbalance (aggressive buy volume minus aggressive sell volume, divided
@@ -31,28 +38,67 @@ DEFAULTS = dict(
     trail_atr=8.0,      # chandelier trailing stop (ATRs below best close)
     sizing="vol",       # "vol": scale exposure to hit target_vol; "risk": fixed % of equity at risk
     target_vol=0.5,     # annualised volatility target for the position (BTC itself runs ~50-70%)
-    allow_short=False,
+    allow_short=False,  # set by the venue profile (see PROFILES)
+    # consolidation pause (None = off): block NEW entries when the market is range-bound
+    chop_adx_min=20,    # require ADX(14) >= this (ADX < 20 = range-bound -> pause)
+    chop_er_min=None,   # require 7-day efficiency ratio >= this
+    # bear side (only used when allow_short=True)
+    short_entry_dev=None,   # flow threshold for shorts (defaults to entry_dev)
+    short_exit_dev=None,    # defaults to exit_dev
+    short_slope=True,       # also require EMA(ema_slow) to be falling (stops shorting bull-market dips)
+    chop_exit=False,        # also EXIT open positions in a range (tested: hurts, so off)
 )
+
+# Venue profiles. Spot venues (Alpaca) can't short: bear regime = cash. Perp/futures venues trade both ways.
+PROFILES = {
+    "spot_long_flat": dict(allow_short=False),
+    "perp_long_short": dict(allow_short=True),
+}
+
+
+def regime(f, p):
+    """Label each bar BULL / BEAR / RANGE using the same rules the entries use."""
+    import numpy as np
+    import pandas as pd
+    trending = f["adx"] >= p["chop_adx_min"] if p.get("chop_adx_min") is not None else True
+    bull = (f["close"] > f["ema_slow"]) & trending
+    bear = (f["close"] < f["ema_slow"]) & trending
+    if p.get("short_slope"):
+        bear &= f["ema_slope"] < 0
+    return pd.Series(np.select([bull, bear], ["BULL", "BEAR"], "RANGE"), index=f.index)
 
 
 def signal(f, p):
     dev = f["flow_dev"]
+    se = p.get("short_entry_dev") if p.get("short_entry_dev") is not None else p["entry_dev"]
+    sx = p.get("short_exit_dev") if p.get("short_exit_dev") is not None else p["exit_dev"]
     long_ok = dev > p["entry_dev"]
-    short_ok = dev < -p["entry_dev"]
+    short_ok = dev < -se
     if p.get("spot_confirm") and "spot_dev" in f:
         long_ok &= f["spot_dev"] > 0
         short_ok &= f["spot_dev"] < 0
     if p.get("trend_filter"):
         long_ok &= f["close"] > f["ema_slow"]
         short_ok &= f["close"] < f["ema_slow"]
+    if p.get("short_slope"):
+        short_ok &= f["ema_slope"] < 0
+    trending = True
+    if p.get("chop_adx_min") is not None:
+        trending = trending & (f["adx"] >= p["chop_adx_min"])
+    if p.get("chop_er_min") is not None:
+        trending = trending & (f["er"] >= p["chop_er_min"])
+    long_ok &= trending
+    short_ok &= trending
     fz = p.get("funding_max_z")
     if fz is not None and "funding_z" in f:
         long_ok &= ~(f["funding_z"] > fz)
         short_ok &= ~(f["funding_z"] < -fz)
+    chop = ~trending if trending is not True else False
+    ce = p.get("chop_exit")
     out = {
         "entry_long": long_ok,
-        "exit_long": dev < p["exit_dev"],
+        "exit_long": (dev < p["exit_dev"]) | (chop if ce else False),
         "entry_short": short_ok,
-        "exit_short": dev > -p["exit_dev"],
+        "exit_short": (dev > -sx) | (chop if ce else False),
     }
     return {k: v.fillna(False).to_numpy() for k, v in out.items()}

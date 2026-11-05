@@ -37,6 +37,17 @@ def atr(df, n=14):
     return tr.ewm(alpha=1 / n, adjust=False).mean()
 
 
+def adx(df, n=14):
+    up, dn = df["high"].diff(), -df["low"].diff()
+    pdm = up.where((up > dn) & (up > 0), 0.0)
+    mdm = dn.where((dn > up) & (dn > 0), 0.0)
+    a = atr(df, n)
+    pdi = 100 * pdm.ewm(alpha=1 / n, adjust=False).mean() / a
+    mdi = 100 * mdm.ewm(alpha=1 / n, adjust=False).mean() / a
+    dx = 100 * (pdi - mdi).abs() / (pdi + mdi).replace(0, np.nan)
+    return dx.ewm(alpha=1 / n, adjust=False).mean()
+
+
 def build(df, p):
     """p: dict of feature params (see strategy.DEFAULTS)."""
     f = pd.DataFrame(index=df.index)
@@ -65,6 +76,14 @@ def build(df, p):
     r = np.log(df["close"]).diff()
     f["rvol"] = r.rolling(p["z_n"]).std()
     f["rvol_rank"] = f["rvol"].rolling(p["z_n"] * 3, min_periods=p["z_n"]).rank(pct=True)
+    # --- regime / consolidation measures
+    er_n = p.get("er_n", 42)
+    chg = df["close"].diff().abs()
+    f["er"] = (df["close"] - df["close"].shift(er_n)).abs() / chg.rolling(er_n).sum()   # Kaufman efficiency ratio
+    f["adx"] = adx(df, p.get("adx_n", 14))
+    f["ema_slope"] = f["ema_slow"].pct_change(p.get("slope_n", 30))
+    bw = (df["high"].rolling(er_n).max() - df["low"].rolling(er_n).min()) / df["close"]
+    f["range_rank"] = bw.rolling(p.get("base_n", 2190), min_periods=p.get("base_n", 2190) // 4).rank(pct=True)   # range width vs past year
     f["don_hi"] = df["high"].rolling(p["don_n"]).max()
     f["don_lo"] = df["low"].rolling(p["don_n"]).min()
     return f

@@ -10,6 +10,11 @@ BTC Flow Regime bot: trades BTC/USD on an Alpaca PAPER account.
 Run it every hour (Task Scheduler / cron / GitHub Actions). Decisions are only made on CLOSED 4h bars,
 so extra runs are harmless: the bot is idempotent per bar.
 
+Regimes (see btc_bot/strategy.py)
+  BULL  -> long when 14-day buy-side flow confirms
+  BEAR  -> cash on Alpaca (spot can't be shorted); the short signal is still shown so you can see it
+  RANGE -> pause: no new entries while ADX < 20. Open trades keep their flow exit and stops.
+
 Risk controls
   * Position size from volatility targeting (strategy.DEFAULTS["target_vol"]), never > 100% of equity
     (no leverage) and never more than --max-notional dollars.
@@ -30,14 +35,16 @@ from btc_bot.alpaca import PaperClient, load_env
 
 STATE = os.path.join(HERE, "state.json")
 LOG = os.path.join(HERE, "bot_log.csv")
-P = dict(strategy.DEFAULTS)
+# Alpaca crypto is spot-only: BULL -> long, BEAR -> cash (short signals are reported, not traded), RANGE -> pause.
+VENUE = "spot_long_flat"
+P = {**strategy.DEFAULTS, **strategy.PROFILES[VENUE]}
 
 
 def load_state():
     if os.path.exists(STATE):
         return json.load(open(STATE))
     return {"last_bar": None, "stop": None, "best_close": None, "entry_px": None, "entry_time": None,
-            "stop_order_id": None, "peak_equity": None, "halted": False}
+            "stop_order_id": None, "peak_equity": None, "halted": False, "regime": None}
 
 
 def save_state(s):
@@ -61,6 +68,8 @@ def compute_signal():
     df = df[df.index + pd.Timedelta(P["timeframe"]) <= now]            # closed bars only
     f = features.build(df, P)
     sig = strategy.signal(f, P)
+    sig_ls = strategy.signal(f, {**P, "allow_short": True})
+    reg = strategy.regime(f, P)
     i = len(f) - 1
     last = f.iloc[i]
     bpy = pd.Timedelta(days=365) / pd.Timedelta(P["timeframe"])
@@ -68,10 +77,21 @@ def compute_signal():
     return dict(bar=str(f.index[i]), close=float(last.close), atr=float(last.atr),
                 flow_dev=float(last.flow_dev), spot_dev=float(last.spot_dev), ema_slow=float(last.ema_slow),
                 entry=bool(sig["entry_long"][i]), exit=bool(sig["exit_long"][i]), frac=frac,
+                regime=str(reg.iloc[i]), adx=float(last.adx), short_signal=bool(sig_ls["entry_short"][i]),
                 age_h=(now - (f.index[i] + pd.Timedelta(P["timeframe"]))).total_seconds() / 3600, info=info)
 
 
+REGIME_TEXT = {
+    "BULL": "uptrend: long trades allowed when buy-side flow confirms",
+    "BEAR": "downtrend: Alpaca can't short, so the bot holds cash",
+    "RANGE": "consolidation (ADX < {adx_min}): PAUSED, no new trades",
+}
+
+
 def describe(s):
+    print(f"Regime: {s['regime']} | ADX {s['adx']:.1f} | " + REGIME_TEXT[s["regime"]].format(adx_min=P["chop_adx_min"]))
+    if s["short_signal"]:
+        print("  Bear flow signal active: a short venue would be opening a short now.")
     print(f"Last closed 4h bar: {s['bar']}  close={s['close']:,.0f}  ATR={s['atr']:,.0f}")
     print(f"  flow_dev={s['flow_dev']:+.4f} (enter > {P['entry_dev']}, exit < {P['exit_dev']})  "
           f"spot_dev={s['spot_dev']:+.4f}  above EMA{P['ema_slow']}={s['close'] > s['ema_slow']}")
@@ -107,6 +127,10 @@ def main():
     if a.status:
         return
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    if st.get("regime") != s["regime"]:
+        log(dict(time=now, bar=s["bar"], action="REGIME", price=s["close"],
+                 detail=f"{st.get('regime')} -> {s['regime']} (ADX {s['adx']:.1f})"))
+        st["regime"] = s["regime"]
     st["peak_equity"] = max(st.get("peak_equity") or equity, equity)
 
     def flatten(why):
@@ -180,7 +204,9 @@ def main():
                              detail=f"${usd:,.0f} ({s['frac']:.0%} target), qty {q:.6f}, stop {st['stop']:,.0f}"))
                     print(f">>> ENTRY ${usd:,.0f} at ~{fill:,.0f}, stop {st['stop']:,.0f}")
         else:
-            print("Flat. No entry.")
+            print({"BULL": "Flat. Bull regime but flow hasn't confirmed yet.",
+                   "BEAR": "Flat. Bear regime: holding cash.",
+                   "RANGE": "Flat. Consolidation: paused."}[s["regime"]])
     st["last_bar"] = s["bar"]
     save_state(st)
 

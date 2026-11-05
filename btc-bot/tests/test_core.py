@@ -43,6 +43,24 @@ class NoLookahead(unittest.TestCase):
             self.assertTrue(sig["entry_long"][pos[t] - 1], "entry must follow a signal on the previous bar")
 
 
+class Regimes(unittest.TestCase):
+    def test_entries_respect_regime(self):
+        df = synthetic(6000, seed=3)
+        p = {**strategy.DEFAULTS, **strategy.PROFILES["perp_long_short"], "base_n": 600}
+        f = features.build(df, p); sig = strategy.signal(f, p); reg = strategy.regime(f, p).to_numpy()
+        self.assertTrue((reg[sig["entry_long"]] == "BULL").all())
+        self.assertTrue((reg[sig["entry_short"]] == "BEAR").all())
+        self.assertGreater(sig["entry_long"].sum() + sig["entry_short"].sum(), 0)
+        self.assertGreater((reg == "RANGE").sum(), 0)
+
+    def test_spot_profile_never_shorts(self):
+        df = synthetic(6000, seed=3)
+        p = {**strategy.DEFAULTS, **strategy.PROFILES["spot_long_flat"], "base_n": 600}
+        f = features.build(df, p)
+        r = bt.run(f, strategy.signal(f, p), p)
+        self.assertTrue(len(r.trades) == 0 or (r.trades.side == "long").all())
+
+
 class Accounting(unittest.TestCase):
     def frame(self, opens, lows, closes):
         idx = pd.date_range("2024-01-01", periods=len(opens), freq="4h", tz="UTC")
