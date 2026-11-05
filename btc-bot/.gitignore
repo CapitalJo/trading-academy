@@ -1,0 +1,7 @@
+data/
+.env
+state.json
+state.json.tmp
+bot_log.csv
+__pycache__/
+bot_output.txt
