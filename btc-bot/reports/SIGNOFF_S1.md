@@ -1,6 +1,6 @@
 # Strategy sign-off: S1, Flow Regime v1.0, spot long/flat (v1.0)
 
-Strategy **S1** · fingerprint **`ea6baed8d9d9`** · venue **Alpaca BTC/USD spot (long or cash)** · generated 2026-11-06 04:47 UTC · data 2019-12-31 → 2026-11-04 · costs 0.25% fee + 0.05% slippage per side
+Strategy **S1** · fingerprint **`ea6baed8d9d9`** · venue **Alpaca BTC/USD spot (long or cash)** · generated 2026-11-06 05:07 UTC · data 2019-12-31 → 2026-11-04 · costs 0.25% fee + 0.05% slippage per side
 
 > Educational research, not financial advice. Backtests are estimates. This document fixes, **before** live trading, what results count as "the strategy is behaving as tested" and what counts as "it has stopped working".
 
@@ -153,7 +153,7 @@ A halt is cleared only by you (`python bot.py --reset-halt`) after reviewing wha
 
 ## 7. Sign-off
 
-No approval on file. The bot runs dry only.
+Current approval on file: **capitaljo (approved in Claude Code chat)**, 2026-11-06T05:06:48+00:00, fingerprint `ea6baed8d9d9` → **matches this strategy.**
 
 To approve exactly this version (fingerprint `ea6baed8d9d9`):
 

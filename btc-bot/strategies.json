@@ -12,7 +12,7 @@
       "decided": "2026-11-06",
       "source": "This project: btc_bot/strategy.py (VARIANTS['S1']), reports/SIGNOFF_S1.md",
       "evidence": "2023-26 out-of-sample: win 45%, Sharpe 1.48, max DD -18.6%, +28%/yr. Full: win 42%, DD -20.5%. Walk-forward 2022-now: +7.8%/yr, Sharpe 0.55, DD -26.8%. Monte Carlo 1-in-20 DD -34%. Beat plain trend rules out-of-sample.",
-      "next": "Sign off (python signoff.py --strategy S1 --approve), then paper trade in Alpaca paper account #1 alongside S2 for 3-6 months."
+      "next": "SIGNED OFF 2026-11-06 by capitaljo. Paper trade in Alpaca paper account #1 (.env.S1), hourly via run_bot.bat, for 3-6 months. Watch dashboard.html; check python compare.py --live --parity monthly."
     },
     {
       "id": "S2",
@@ -21,7 +21,7 @@
       "decided": "2026-11-06",
       "source": "This project: btc_bot/strategy.py (VARIANTS['S2']), reports/SIGNOFF_S2.md",
       "evidence": "Win 67% (2020-22) / 65% (2023-26); max DD -10.6% / -13.9%; Monte Carlo 1-in-20 DD -28%; avg loss -3.6%, payoff 1.5x. Walk-forward 2022-now weaker than S1: +3.2%/yr, Sharpe 0.28, DD -27.5% (S1: +7.8%, 0.55, -26.8%).",
-      "next": "Sign off (python signoff.py --strategy S2 --approve), then paper trade in Alpaca paper account #2 alongside S1. Compare with python compare.py --parity."
+      "next": "SIGNED OFF 2026-11-06 by capitaljo. Paper trade in Alpaca paper account #2 (.env.S2), hourly via run_bot.bat, for 3-6 months. Watch dashboard.html; check python compare.py --live --parity monthly."
     },
     {
       "id": "S3",

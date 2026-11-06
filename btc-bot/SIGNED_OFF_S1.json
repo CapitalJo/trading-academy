@@ -1,0 +1,51 @@
+{
+  "name": "capitaljo (approved in Claude Code chat)",
+  "date": "2026-11-06T05:06:48+00:00",
+  "strategy": "S1",
+  "version": "1.0",
+  "fingerprint": "ea6baed8d9d9",
+  "params": {
+    "timeframe": "4h",
+    "flow_n": 84,
+    "base_n": 2190,
+    "z_n": 180,
+    "ema_fast": 50,
+    "ema_slow": 200,
+    "atr_n": 14,
+    "don_n": 20,
+    "entry_dev": 0.005,
+    "exit_dev": -0.005,
+    "spot_confirm": true,
+    "trend_filter": true,
+    "funding_max_z": null,
+    "stop_atr": 5.0,
+    "trail_atr": 8.0,
+    "sizing": "vol",
+    "target_vol": 0.3,
+    "allow_short": false,
+    "chop_adx_min": 20,
+    "chop_er_min": null,
+    "short_entry_dev": null,
+    "short_exit_dev": null,
+    "short_slope": true,
+    "chop_exit": false
+  },
+  "limits": {
+    "strategy": "S1",
+    "version": "1.0",
+    "fingerprint": "ea6baed8d9d9",
+    "venue": "spot_long_flat",
+    "dd_warn": -0.22,
+    "dd_halt": -0.34,
+    "warn_consecutive_losses": 9,
+    "max_consecutive_losses": 13,
+    "worst_single_loss": -0.088,
+    "avg_loss_review": -0.052,
+    "win_rate_review": {
+      "10": 1,
+      "15": 2,
+      "20": 4,
+      "30": 7
+    }
+  }
+}

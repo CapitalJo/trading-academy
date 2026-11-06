@@ -34,7 +34,7 @@ class PaperClient:
     def from_env(cls):
         key, sec = os.environ.get("ALPACA_API_KEY_ID"), os.environ.get("ALPACA_API_SECRET_KEY")
         if not key or not sec:
-            sys.exit("Missing ALPACA_API_KEY_ID / ALPACA_API_SECRET_KEY (put PAPER keys in btc-bot/.env).")
+            sys.exit("Missing ALPACA_API_KEY_ID / ALPACA_API_SECRET_KEY: put that strategy's PAPER keys in btc-bot/.env.S1 or .env.S2 (see README).")
         return cls(key, sec, os.environ.get("ALPACA_BASE_URL", PAPER_URL))
 
     def _req(self, method, path, params=None, body=None):
