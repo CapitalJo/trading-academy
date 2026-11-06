@@ -69,6 +69,7 @@ btc_bot/alpaca.py      paper-only Alpaca client (stdlib)
 research.py            full study -> reports/REPORT.md, equity/drawdown SVGs, trades/grid CSVs
 signoff.py             sign-off pack per strategy (reports/SIGNOFF_<id>.md), survival limits, --approve
 compare.py             S1 vs S2 paper scoreboard; --parity checks the bot traded on the backtest's bars
+dashboard.py           builds dashboard.html (charts: equity vs BTC, drawdown vs limits, activity); --demo previews it
 STRATEGY_LOG.md        every strategy considered: PROCEED / CANDIDATE / PARKED / REJECTED + evidence
 strategies.json        same registry, machine-readable ('active' = strategies being paper traded)
 strategy_log.py        regenerates STRATEGY_LOG.md from strategies.json
@@ -100,10 +101,13 @@ and neither could be measured.
 5. Automate **hourly**. Decisions happen only on closed 4h bars, so extra runs are harmless:
    - Windows: Task Scheduler → run `run_bot.bat` every hour (it runs S1 then S2).
    - macOS/Linux cron: `5 * * * * /path/to/btc-bot/run_bots.sh`
-6. Check progress any time: `python compare.py --live` (scoreboard) and `python compare.py --parity` (did the bots trade on the
-   same bars the backtest would have?).
+6. **Charts:** open `dashboard.html` in your browser. `run_bot.bat` rebuilds it after every hourly run and the page reloads
+   itself every 10 minutes. It shows S1 vs S2 side by side: paper equity against BTC buy-and-hold, drawdown against the warn and
+   halt lines, trades, win rate against the backtest, losing streak, regime, and recent bot activity. Preview the layout before any
+   trades with `python dashboard.py --demo --open`.
+7. Check the bots match the backtest: `python compare.py --live --parity`.
 
-Each strategy keeps its own files: `state_<id>.json`, `bot_log_<id>.csv` (every row stamped with strategy id, version and
+Each strategy keeps its own files: `state_<id>.json`, `equity_<id>.csv` (one row per run, for the charts), `bot_log_<id>.csv` (every row stamped with strategy id, version and
 fingerprint), `SIGNED_OFF_<id>.json`, `bot_output_<id>.txt`. Options: `--max-notional 25000` caps dollars per position.
 `--halt-dd 0.20` makes the drawdown halt stricter than the signed-off limit (it can't be loosened).
 `--reset-halt` re-arms a strategy after a survival-limit halt, once you've reviewed what happened.

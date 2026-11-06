@@ -131,6 +131,20 @@ def log(row):
         w.writerow({"strategy": strategy_tag(), **row})
 
 
+EQ_FIELDS = ["time", "equity", "btc_price", "btc_qty", "regime", "halted"]
+
+
+def snapshot(now, equity, s, qty, st):
+    """One row per --trade run: the dashboard's equity and drawdown charts come from this file."""
+    path = os.path.join(HERE, f"equity_{SID}.csv")
+    new = not os.path.exists(path)
+    with open(path, "a", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=EQ_FIELDS)
+        if new: w.writeheader()
+        w.writerow(dict(time=now, equity=f"{equity:.2f}", btc_price=f"{s['close']:.2f}", btc_qty=f"{qty:.8f}",
+                        regime=s["regime"], halted=bool(st.get("halted"))))
+
+
 def compute_signal():
     raw, info = live_data.load_live()
     df = features.resample(raw, P["timeframe"])
@@ -218,6 +232,7 @@ def main():
             print(f"Live vs survival limits: {summ}" + (f"\n  HALT CONDITION: {h}" if h else "") + "".join(f"\n  warning: {x}" for x in w))
         return
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    snapshot(now, equity, s, qty, st)
     if st.get("regime") != s["regime"]:
         log(dict(time=now, bar=s["bar"], action="REGIME", price=s["close"],
                  detail=f"{st.get('regime')} -> {s['regime']} (ADX {s['adx']:.1f})"))

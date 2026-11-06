@@ -12,3 +12,7 @@ state_*.json
 state_*.json.tmp
 bot_log_*.csv
 bot_output_*.txt
+equity_*.csv
+dashboard.html
+dashboard_demo.html
+bot_output_dashboard.txt
