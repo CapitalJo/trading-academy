@@ -1,0 +1,36 @@
+# Strategy log
+
+Every BTC strategy considered for this bot, its status, and the evidence behind the decision. Machine-readable copy: `strategies.json`.
+The bot stamps each row of `bot_log.csv` with the active strategy id, version and fingerprint, so live results always trace back to an entry here.
+
+Status: **PROCEED** = paper trade it · **CANDIDATE** = passed tests, needs your decision · **PARKED** = sound but blocked · **REJECTED** = failed, do not trade.
+
+**Active in the bot:** `S1`
+
+| ID | Strategy | Status | Decided | Key evidence | Next step |
+|---|---|---|---|---|---|
+| S1 | Flow Regime v1.0, spot long/flat (Alpaca) | **PROCEED** | 2026-11-06 | 2023-26 out-of-sample: win 45%, Sharpe 1.48, max DD -18.6%, +28%/yr. Full: win 42%, DD -20.5%. Walk-forward 2022-now: +7.8%/yr, Sharpe 0.55, DD -26.8%. Monte Carlo 1-in-20 DD -34%. Beat plain trend rules out-of-sample. | Your sign-off (python signoff.py --approve), then paper trade 3-6 months against the survival limits. |
+| S2 | Flow Regime v1.1 = v1.0 + take 1/3 profit at +2 ATR, rest to breakeven | **CANDIDATE** | 2026-11-06 | Win 67% (2020-22) / 65% (2023-26); max DD -11% / -14%; Monte Carlo 1-in-20 DD -28%; +12% / +17% per yr. Every profit-take level tested raised win rate and cut drawdown. Lower return than S1 at equal risk. | Your choice vs S1. If chosen: walk-forward, Monte Carlo limits, new sign-off, bot partial-sell support. |
+| S3 | Flow Regime perp long/short (bull long, bear short, range pause) | **PARKED** | 2026-11-05 | 2022 bear year about 0% vs -17% (S1) and -65% (BTC). But shorts added about 0 in 2023-26: crash insurance, not profit. Needs a venue that can short (IBKR CME micro futures or Coinbase/Kraken US perps). | Revisit after S1/S2 has a live paper record. |
+| S4 | Order-book entry timing (limit orders when the book favours us) | **PARKED** | 2026-11-06 | Not tested. Could save a few basis points per trade on S1/S2 entries. Execution improvement, not a strategy. | Low priority; only after paper trading shows fill quality. |
+| R1 | Order Book Imbalance (OBI) scalping, 2-4 tick targets | **REJECTED** | 2026-11-06 | Fees about $76-380 per BTC round trip vs a $0.20-0.40 target: loses even at 100% win rate. Needs microsecond colocation; walls get spoofed. No tick-level book history to backtest. | None. |
+| R2 | Bollinger RSI Exhaustion (BB 20/2.5 + RSI7 <20/>80, exit at basis, 1.5 ATR stop) | **REJECTED** | 2026-11-06 | BTC 1h as written: win 37-39%, -39% to -55%/yr, DD -86% to -88%. Loses even with zero fees (2023-26: -20%/yr, DD -66%). 4h: win 42%, -8%/yr, DD -38%. research_alternatives/bollinger_rsi_exhaustion.py | None. |
+| R3 | RSI dip-buying in uptrends (with and without flow filter) | **REJECTED** | 2026-11-06 | With flow filter: 0 of 108 configs profitable 2023-26. Without: 7% of 162 (Alpaca costs), 15% (perp costs); the IS-best config lost out-of-sample. | None. |
+| R4 | Funding carry / cash-and-carry basis trade | **REJECTED** | 2026-11-06 | Best rule +2%/yr 2020-26, about 0% in 2025-26; other rules negative. Reports put 2026 basis yields below Treasury rates. Needs a perp account too. | Re-check only if funding stays strongly positive for months. |
+| R5 | Plain trend following (above 200 EMA / 200-day average) | **REJECTED** | 2026-11-06 | Looked best in 2020-22 (Sharpe 1.32) and collapsed in 2023-26 (Sharpe 0.50, DD -44%). 150-190 trades out-of-sample = fee drag. research_alternatives/trend_baselines.py | None. Kept as the benchmark S1 must keep beating. |
+| R6 | Spot-only taker flow signal | **REJECTED** | 2026-11-05 | 2023-26 Sharpe 0.54 vs 1.26 with perp flow. | None. |
+| R7 | Early v0: z-scored flow with 2-day holds | **REJECTED** | 2026-11-05 | 2023-26 about flat (Sharpe 0.18); 151 trades at 0.6% round trip ate the edge. | None. Led to the slower S1 design. |
+
+## Rules tested and rejected inside the Flow Regime strategy
+
+- Exiting open trades when consolidation starts (hurt every variant)
+- Funding-crowding entry veto (no benefit)
+- Tight 3/5 ATR stops (2023-26 Sharpe 0.71 vs 1.48)
+- Yearly parameter re-optimisation (chased noise; fixed parameters were more stable)
+
+## Adding a new strategy
+
+1. Add an entry to `strategies.json` with status `CANDIDATE` and its source.
+2. Test it the same way: choose settings on 2020-22 only, report 2023-26 untouched, include costs, and show win rate, average win/loss and Monte Carlo drawdown.
+3. Record the verdict and evidence, then regenerate this file: `python strategy_log.py`.
+4. Only a signed-off fingerprint (`python signoff.py --approve`) can trade.

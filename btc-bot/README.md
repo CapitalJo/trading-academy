@@ -4,7 +4,7 @@ An automated BTC strategy built on **market flow**: who is hitting the market, a
 bull and bear regimes and **pauses during consolidation**.
 It includes a reproducible backtest, walk-forward validation, and a bot that trades **BTC/USD on an Alpaca paper account**.
 
-**Full results:** [`reports/REPORT.md`](reports/REPORT.md) (regenerate any time with `python research.py`).
+**Strategy log:** [`STRATEGY_LOG.md`](STRATEGY_LOG.md) · **Full results:** [`reports/REPORT.md`](reports/REPORT.md) (regenerate any time with `python research.py`).
 
 > Educational project, not financial advice. The bot is hard-wired to Alpaca's **paper** endpoint and refuses the live one.
 
@@ -62,6 +62,10 @@ btc_bot/backtest.py    bar-by-bar engine: next-open fills, intrabar stops with g
 btc_bot/alpaca.py      paper-only Alpaca client (stdlib)
 research.py            full study -> reports/REPORT.md, equity/drawdown SVGs, trades/grid CSVs
 signoff.py             sign-off pack (reports/SIGNOFF.md), survival limits, --approve
+STRATEGY_LOG.md        every strategy considered: PROCEED / CANDIDATE / PARKED / REJECTED + evidence
+strategies.json        same registry, machine-readable; 'active' id is stamped on every bot_log.csv row
+strategy_log.py        regenerates STRATEGY_LOG.md from strategies.json
+research_alternatives/ reproducible tests of the rejected/candidate strategies
 bot.py                 the trading bot (dry-run by default)
 tests/                 no-lookahead, regime consistency, fill/fee accounting, survival limits, sign-off, paper-only safety
 ```

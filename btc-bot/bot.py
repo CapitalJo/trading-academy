@@ -95,12 +95,30 @@ def save_state(s):
     os.replace(tmp, STATE)
 
 
+FIELDS = ["time", "strategy", "bar", "action", "price", "detail"]
+
+
+def strategy_tag():
+    """e.g. 'S1 v1.0 ea6baed8d9d9': id from strategies.json + version + parameter fingerprint."""
+    sid = "?"
+    try:
+        sid = json.load(open(os.path.join(HERE, "strategies.json"))).get("active", "?")
+    except (OSError, ValueError):
+        pass
+    return f"{sid} v{strategy.VERSION} {strategy.fingerprint(P)}"
+
+
 def log(row):
+    if os.path.exists(LOG):
+        with open(LOG) as fh:
+            header = fh.readline().strip().split(",")
+        if header != FIELDS:                       # older log without the strategy column
+            os.replace(LOG, LOG.replace(".csv", "_legacy.csv"))
     new = not os.path.exists(LOG)
     with open(LOG, "a", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=["time", "bar", "action", "price", "detail"])
+        w = csv.DictWriter(fh, fieldnames=FIELDS)
         if new: w.writeheader()
-        w.writerow(row)
+        w.writerow({"strategy": strategy_tag(), **row})
 
 
 def compute_signal():

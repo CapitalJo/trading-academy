@@ -50,6 +50,9 @@ def run(f, sig, p, costs=Costs(), risk_per_trade=0.02, max_leverage=1.0, start_e
     stop = entry_px = entry_eq = risk_usd = 0.0
     extreme = 0.0                                    # best close since entry, for trailing
     entry_t = None
+    entry_j = 0
+    scaled = False
+    tp_atr, tp_frac, max_hold = p.get("tp_atr"), p.get("tp_frac", 0.5), p.get("max_hold")
     pend = 0                                         # +1 open long, -1 open short, 2 close
     eq = np.empty(n)
     trades = []
@@ -76,9 +79,17 @@ def run(f, sig, p, costs=Costs(), risk_per_trade=0.02, max_leverage=1.0, start_e
             q = frac * equity / px
             cash -= pend * q * px + q * px * fee
             qty, side, entry_px, entry_eq, entry_t = q, pend, px, equity, idx[j]
+            entry_j, scaled = j, False
             risk_usd = q * dist
             stop = px - pend * dist
             extreme = px
+        elif pend == 3 and side != 0:            # partial profit-take at the open
+            q_out = qty * tp_frac
+            px = o[j] * (1 - slip * side)
+            cash += side * q_out * px - q_out * px * fee
+            qty -= q_out
+            scaled = True
+            stop = max(stop, entry_px) if side > 0 else min(stop, entry_px)   # rest of trade at breakeven or better
         pend = 0
         # 2) protective stop inside the bar
         if side > 0 and l[j] <= stop:
@@ -94,13 +105,17 @@ def run(f, sig, p, costs=Costs(), risk_per_trade=0.02, max_leverage=1.0, start_e
         if side > 0:
             extreme = max(extreme, c[j])
             stop = max(stop, extreme - p["trail_atr"] * a[j])
-            if sig["exit_long"][j]:
+            if sig["exit_long"][j] or (max_hold and j - entry_j + 1 >= max_hold):
                 pend = 2
+            elif tp_atr and not scaled and c[j] >= entry_px + tp_atr * a[j]:
+                pend = 3
         elif side < 0:
             extreme = min(extreme, c[j])
             stop = min(stop, extreme + p["trail_atr"] * a[j])
-            if sig["exit_short"][j]:
+            if sig["exit_short"][j] or (max_hold and j - entry_j + 1 >= max_hold):
                 pend = 2
+            elif tp_atr and not scaled and c[j] <= entry_px - tp_atr * a[j]:
+                pend = 3
         else:
             if sig["entry_long"][j]:
                 pend = 1
