@@ -42,31 +42,39 @@ tested and hurts (REPORT §4), so the pause only blocks new entries.
 - Buy-and-hold made more money in this mostly-bull window. The strategy's advantage is avoiding most of the crashes.
 
 ## Sign-off and survival limits
-`python signoff.py` writes [`reports/SIGNOFF.md`](reports/SIGNOFF.md): the exact rules, the win-rate and drawdown evidence, and
-**survival limits fixed before any live trading**:
-- warn at −22% drawdown, **halt at −34%**;
-- warn at 9 consecutive losses, **halt at 13**;
-- **halt** on any single loss worse than −8.8%;
-- review if the average loss or the win rate falls outside its backtest band.
+Two strategies are being paper traded side by side (see [`STRATEGY_LOG.md`](STRATEGY_LOG.md)):
 
-Once you've reviewed it, run `python signoff.py --approve "Your Name"`. That writes `SIGNED_OFF.json` with the strategy's parameter
-**fingerprint**. `bot.py --trade` refuses to run unless the fingerprint matches, so changing any parameter needs a new sign-off.
+| | S1: Flow Regime v1.0 | S2: v1.1 (+ take ⅓ at +2 ATR, rest to breakeven) |
+|---|---|---|
+| Win rate 2020–22 / 2023–26 | 36% / 45% | 67% / 65% |
+| Max drawdown 2020–22 / 2023–26 | −20.5% / −18.6% | −10.6% / −13.9% |
+| Monte Carlo 1-in-20 drawdown | −34% | −28% |
+| Walk-forward 2022 → now (the honest one) | +7.8%/yr, Sharpe 0.55 | +3.2%/yr, Sharpe 0.28 |
+| **Halt** limits: drawdown / losing streak / single loss | −34% / 13 / −8.8% | −28% / 7 / −8.8% |
+| Sign-off pack | [`reports/SIGNOFF_S1.md`](reports/SIGNOFF_S1.md) | [`reports/SIGNOFF_S2.md`](reports/SIGNOFF_S2.md) |
+
+Each pack has the exact rules, the win-rate and drawdown evidence, and **survival limits fixed before any trading**. Approve each
+one separately with `python signoff.py --strategy S1 --approve "Your Name"` (and the same for `S2`). That writes `SIGNED_OFF_<id>.json`
+with the strategy's parameter **fingerprint**. `bot.py --trade` refuses to run a strategy unless its fingerprint matches, so
+changing any parameter needs a new sign-off.
 
 ## Layout
 ```
 btc_bot/data.py        download + cache Binance bulk archive (klines w/ taker buy volume, funding)
 btc_bot/live_data.py   archive + REST top-up for the live bot
 btc_bot/features.py    flow imbalance, flow_dev, CVD, funding z, ATR, realised vol, EMAs
-btc_bot/strategy.py    regime classifier (BULL/BEAR/RANGE), Flow Regime rules, venue PROFILES, DEFAULTS
+btc_bot/strategy.py    regime classifier, Flow Regime rules, DEFAULTS, VARIANTS (S1, S2) with fingerprints
 btc_bot/backtest.py    bar-by-bar engine: next-open fills, intrabar stops with gap fills, fees, vol sizing
 btc_bot/alpaca.py      paper-only Alpaca client (stdlib)
 research.py            full study -> reports/REPORT.md, equity/drawdown SVGs, trades/grid CSVs
-signoff.py             sign-off pack (reports/SIGNOFF.md), survival limits, --approve
+signoff.py             sign-off pack per strategy (reports/SIGNOFF_<id>.md), survival limits, --approve
+compare.py             S1 vs S2 paper scoreboard; --parity checks the bot traded on the backtest's bars
 STRATEGY_LOG.md        every strategy considered: PROCEED / CANDIDATE / PARKED / REJECTED + evidence
-strategies.json        same registry, machine-readable; 'active' id is stamped on every bot_log.csv row
+strategies.json        same registry, machine-readable ('active' = strategies being paper traded)
 strategy_log.py        regenerates STRATEGY_LOG.md from strategies.json
 research_alternatives/ reproducible tests of the rejected/candidate strategies
-bot.py                 the trading bot (dry-run by default)
+bot.py                 the trading bot: --strategy S1|S2, dry-run by default
+run_bot.bat / run_bots.sh  run S1 and S2 once (schedule hourly)
 tests/                 no-lookahead, regime consistency, fill/fee accounting, survival limits, sign-off, paper-only safety
 ```
 
@@ -75,22 +83,34 @@ tests/                 no-lookahead, regime consistency, fill/fee accounting, su
 pip install -r requirements.txt
 python research.py                  # ~1 min first time (downloads ~7 years of data into ./data)
 python -m unittest discover -s tests
-python bot.py                       # dry run: shows the live signal, no orders
+python bot.py --strategy S1         # dry run: shows the live signal, no orders
 ```
 
-### Paper trading
-1. In Alpaca, switch to the **Paper** account and generate API keys.
-2. `cp .env.example .env` and paste the keys.
-3. Review `reports/SIGNOFF.md`, then `python signoff.py --approve "Your Name"`.
-4. `python bot.py --status` checks the connection and shows live results against the survival limits.
-5. `python bot.py --trade` runs one decision cycle and places paper orders if the signal says so.
-6. Automate it **hourly**. Decisions happen only on closed 4h bars, so extra runs are harmless:
-   - macOS/Linux cron: `5 * * * * cd /path/to/btc-bot && /usr/bin/python3 bot.py --trade >> bot_output.txt 2>&1`
-   - Windows: Task Scheduler → run `run_bot.bat` every hour.
+### Paper trading S1 and S2 side by side (Alpaca)
+Both strategies trade BTC/USD, so each needs its **own** Alpaca paper account. In one account their positions would merge
+and neither could be measured.
 
-Options: `--max-notional 25000` caps dollars per position. `--halt-dd 0.25` makes the drawdown halt stricter than the signed-off
-limit (it can't be loosened). `--reset-halt` re-arms the bot after a survival-limit halt, once you've reviewed what happened.
-Every action is logged to `bot_log.csv`. Bot state is kept in `state.json`.
+1. In the Alpaca dashboard, open the paper-account menu and create a **second paper account**. Reset both to the same
+   starting balance, for example $10,000 each, so results compare directly.
+2. Generate API keys in each paper account. Copy `.env.example` to **`.env.S1`** (keys from account 1) and to **`.env.S2`**
+   (keys from account 2).
+3. Review `reports/SIGNOFF_S1.md` and `reports/SIGNOFF_S2.md`, then approve each:
+   `python signoff.py --strategy S1 --approve "Your Name"` and `python signoff.py --strategy S2 --approve "Your Name"`.
+4. Check both connections: `python bot.py --strategy S1 --status` and `python bot.py --strategy S2 --status`.
+5. Automate **hourly**. Decisions happen only on closed 4h bars, so extra runs are harmless:
+   - Windows: Task Scheduler → run `run_bot.bat` every hour (it runs S1 then S2).
+   - macOS/Linux cron: `5 * * * * /path/to/btc-bot/run_bots.sh`
+6. Check progress any time: `python compare.py --live` (scoreboard) and `python compare.py --parity` (did the bots trade on the
+   same bars the backtest would have?).
+
+Each strategy keeps its own files: `state_<id>.json`, `bot_log_<id>.csv` (every row stamped with strategy id, version and
+fingerprint), `SIGNED_OFF_<id>.json`, `bot_output_<id>.txt`. Options: `--max-notional 25000` caps dollars per position.
+`--halt-dd 0.20` makes the drawdown halt stricter than the signed-off limit (it can't be loosened).
+`--reset-halt` re-arms a strategy after a survival-limit halt, once you've reviewed what happened.
+
+**Why not IBKR for these two:** both are spot long/cash strategies, and Alpaca's paper API already fits them with no extra
+software. IBKR becomes the right platform for the parked long/short version (S3): CME Micro Bitcoin futures can be shorted.
+It needs TWS or IB Gateway running, and its contracts are 0.1 BTC each.
 
 ### Data notes
 - Signal data comes from Binance (BTCUSDT perp + spot) via `data.binance.vision` (bulk archive) and `data-api.binance.vision`

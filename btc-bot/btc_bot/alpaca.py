@@ -68,6 +68,10 @@ class PaperClient:
         return self._req("POST", "/v2/orders", body={"symbol": SYMBOL, "side": "buy", "type": "market",
                          "notional": f"{usd:.2f}", "time_in_force": "gtc", "client_order_id": client_id})
 
+    def market_sell_qty(self, qty, client_id):
+        return self._req("POST", "/v2/orders", body={"symbol": SYMBOL, "side": "sell", "type": "market",
+                         "qty": f"{qty:.9f}".rstrip("0").rstrip("."), "time_in_force": "gtc", "client_order_id": client_id})
+
     def stop_limit_sell(self, qty, stop, limit, client_id):
         return self._req("POST", "/v2/orders", body={"symbol": SYMBOL, "side": "sell", "type": "stop_limit",
                          "qty": f"{qty:.9f}".rstrip("0").rstrip("."), "stop_price": f"{stop:.2f}",

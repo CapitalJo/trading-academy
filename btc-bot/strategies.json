@@ -1,24 +1,27 @@
 {
-  "_about": "Registry of every strategy considered. Status: PROCEED (being paper traded or about to be), CANDIDATE (passed tests, awaiting your decision), PARKED (sound idea, blocked by venue or priority), REJECTED (failed tests; do not trade). bot.py stamps every bot_log.csv row with the ACTIVE id.",
-  "active": "S1",
+  "_about": "Registry of every strategy considered. Status: PROCEED (being paper traded or about to be), CANDIDATE (passed tests, awaiting your decision), PARKED (sound idea, blocked by venue or priority), REJECTED (failed tests; do not trade). 'active' lists the strategies being paper traded; bot.py stamps every row of bot_log_<id>.csv with that strategy's id, version and fingerprint.",
+  "active": [
+    "S1",
+    "S2"
+  ],
   "strategies": [
     {
       "id": "S1",
       "name": "Flow Regime v1.0, spot long/flat (Alpaca)",
       "status": "PROCEED",
       "decided": "2026-11-06",
-      "source": "This project: btc_bot/strategy.py, reports/SIGNOFF.md",
+      "source": "This project: btc_bot/strategy.py (VARIANTS['S1']), reports/SIGNOFF_S1.md",
       "evidence": "2023-26 out-of-sample: win 45%, Sharpe 1.48, max DD -18.6%, +28%/yr. Full: win 42%, DD -20.5%. Walk-forward 2022-now: +7.8%/yr, Sharpe 0.55, DD -26.8%. Monte Carlo 1-in-20 DD -34%. Beat plain trend rules out-of-sample.",
-      "next": "Your sign-off (python signoff.py --approve), then paper trade 3-6 months against the survival limits."
+      "next": "Sign off (python signoff.py --strategy S1 --approve), then paper trade in Alpaca paper account #1 alongside S2 for 3-6 months."
     },
     {
       "id": "S2",
       "name": "Flow Regime v1.1 = v1.0 + take 1/3 profit at +2 ATR, rest to breakeven",
-      "status": "CANDIDATE",
+      "status": "PROCEED",
       "decided": "2026-11-06",
-      "source": "This project: research_alternatives/pullback_carry_profit_take.py (part D)",
-      "evidence": "Win 67% (2020-22) / 65% (2023-26); max DD -11% / -14%; Monte Carlo 1-in-20 DD -28%; +12% / +17% per yr. Every profit-take level tested raised win rate and cut drawdown. Lower return than S1 at equal risk.",
-      "next": "Your choice vs S1. If chosen: walk-forward, Monte Carlo limits, new sign-off, bot partial-sell support."
+      "source": "This project: btc_bot/strategy.py (VARIANTS['S2']), reports/SIGNOFF_S2.md",
+      "evidence": "Win 67% (2020-22) / 65% (2023-26); max DD -10.6% / -13.9%; Monte Carlo 1-in-20 DD -28%; avg loss -3.6%, payoff 1.5x. Walk-forward 2022-now weaker than S1: +3.2%/yr, Sharpe 0.28, DD -27.5% (S1: +7.8%, 0.55, -26.8%).",
+      "next": "Sign off (python signoff.py --strategy S2 --approve), then paper trade in Alpaca paper account #2 alongside S1. Compare with python compare.py --parity."
     },
     {
       "id": "S3",

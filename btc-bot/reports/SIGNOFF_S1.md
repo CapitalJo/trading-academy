@@ -1,6 +1,6 @@
-# Strategy sign-off: BTC Flow Regime v1.0
+# Strategy sign-off: S1, Flow Regime v1.0, spot long/flat (v1.0)
 
-Fingerprint **`ea6baed8d9d9`** · venue **Alpaca BTC/USD spot (long or cash)** · generated 2026-11-06 02:08 UTC · data 2019-12-31 → 2026-11-04 · costs 0.25% fee + 0.05% slippage per side
+Strategy **S1** · fingerprint **`ea6baed8d9d9`** · venue **Alpaca BTC/USD spot (long or cash)** · generated 2026-11-06 04:47 UTC · data 2019-12-31 → 2026-11-04 · costs 0.25% fee + 0.05% slippage per side
 
 > Educational research, not financial advice. Backtests are estimates. This document fixes, **before** live trading, what results count as "the strategy is behaving as tested" and what counts as "it has stopped working".
 
@@ -129,7 +129,7 @@ The rules are the same; only `target_vol` changes. Drawdown scales with size, wh
 
 ## 5. Survival limits (fixed now, enforced by the bot)
 
-These are written to `reports/survival_limits.json`. On sign-off they're copied into `SIGNED_OFF.json`, which the bot reads.
+These are written to `reports/survival_limits_S1.json`. On sign-off they're copied into `SIGNED_OFF_S1.json`, which the bot reads.
 
 | Check | Limit | Bot action | Why this number |
 |---|---|---|---|
@@ -158,5 +158,5 @@ No approval on file. The bot runs dry only.
 To approve exactly this version (fingerprint `ea6baed8d9d9`):
 
 ```
-python signoff.py --approve "Your Name"
+python signoff.py --strategy S1 --approve "Your Name"
 ```

@@ -2,10 +2,16 @@
 """
 BTC Flow Regime bot: trades BTC/USD on an Alpaca PAPER account.
 
-  python bot.py                 dry run: fetch data, compute the signal, print the plan (no orders)
-  python bot.py --trade         same, then send the orders to the Alpaca PAPER account
-  python bot.py --status        show account, position, bot state
-  python bot.py --reset-halt    clear the drawdown kill switch after you've reviewed what happened
+  python bot.py --strategy S1                dry run: fetch data, compute the signal, print the plan (no orders)
+  python bot.py --strategy S1 --trade        same, then send the orders to the Alpaca PAPER account
+  python bot.py --strategy S2 --status       show account, position, live results vs survival limits
+  python bot.py --strategy S2 --reset-halt   clear a survival-limit halt after you've reviewed it
+
+Strategies (btc_bot/strategy.py VARIANTS, STRATEGY_LOG.md):
+  S1  Flow Regime v1.0
+  S2  Flow Regime v1.1: S1 + sell 1/3 at +2 ATR, then the stop on the rest goes to breakeven
+Each strategy keeps its own files, so they can run side by side in separate Alpaca paper accounts:
+  keys .env.S1 / .env.S2 (falls back to .env) · state_S1.json · bot_log_S1.csv · SIGNED_OFF_S1.json
 
 Run it every hour (Task Scheduler / cron / GitHub Actions). Decisions are only made on CLOSED 4h bars,
 so extra runs are harmless: the bot is idempotent per bar.
@@ -20,9 +26,9 @@ Risk controls
     (no leverage) and never more than --max-notional dollars.
   * Disaster stop: a resting GTC stop-limit sell on Alpaca at entry - 5 ATR, ratcheted up as a
     chandelier trail (best close - 8 ATR). The bot also checks the stop itself each run.
-  * Sign-off gate: --trade only runs if SIGNED_OFF.json matches the current strategy fingerprint
-    (python signoff.py --approve "Name"). Changing any parameter requires a new sign-off.
-  * Survival limits from the sign-off (reports/SIGNOFF.md §5): drawdown, losing streak, single-trade
+  * Sign-off gate: --trade only runs if SIGNED_OFF_<id>.json matches the strategy's fingerprint
+    (python signoff.py --strategy <id> --approve "Name"). Changing any parameter requires a new sign-off.
+  * Survival limits from the sign-off (reports/SIGNOFF_<id>.md §5): drawdown, losing streak, single-trade
     loss, average loss and win-rate checks. Warnings are logged. A breached halt limit flattens the
     position and stops trading until you run --reset-halt.
   * Stale-data guard: no new entries if the newest bar is more than 6 hours old.
@@ -35,18 +41,27 @@ sys.path.insert(0, HERE)
 from btc_bot import features, strategy, live_data, backtest as bt
 from btc_bot.alpaca import PaperClient, load_env
 
-STATE = os.path.join(HERE, "state.json")
-SIGNED = os.path.join(HERE, "SIGNED_OFF.json")
-LOG = os.path.join(HERE, "bot_log.csv")
 # Alpaca crypto is spot-only: BULL -> long, BEAR -> cash (short signals are reported, not traded), RANGE -> pause.
-VENUE = "spot_long_flat"
-P = {**strategy.DEFAULTS, **strategy.PROFILES[VENUE]}
+SID = P = STATE = SIGNED = LOG = None
+
+
+def configure(sid):
+    """Point the bot at one strategy's parameters and files."""
+    global SID, P, STATE, SIGNED, LOG
+    SID, P = sid, strategy.params(sid)
+    STATE = os.path.join(HERE, f"state_{sid}.json")
+    SIGNED = os.path.join(HERE, f"SIGNED_OFF_{sid}.json")
+    LOG = os.path.join(HERE, f"bot_log_{sid}.csv")
+
+
+configure("S1")
 
 
 def load_signoff():
     """Return the approval record if it matches the strategy the bot is about to run, else None."""
     if not os.path.exists(SIGNED):
-        return None, "no SIGNED_OFF.json (run: python signoff.py, review reports/SIGNOFF.md, then --approve)"
+        return None, (f"no {os.path.basename(SIGNED)} (run: python signoff.py --strategy {SID}, "
+                      f"review reports/SIGNOFF_{SID}.md, then --approve)")
     rec = json.load(open(SIGNED))
     fp = strategy.fingerprint(P)
     if rec.get("fingerprint") != fp:
@@ -86,7 +101,7 @@ def load_state():
         return json.load(open(STATE))
     return {"last_bar": None, "stop": None, "best_close": None, "entry_px": None, "entry_time": None,
             "stop_order_id": None, "peak_equity": None, "halted": False, "regime": None,
-            "entry_equity": None, "closed_trades": []}
+            "entry_equity": None, "closed_trades": [], "scaled": False}
 
 
 def save_state(s):
@@ -99,13 +114,8 @@ FIELDS = ["time", "strategy", "bar", "action", "price", "detail"]
 
 
 def strategy_tag():
-    """e.g. 'S1 v1.0 ea6baed8d9d9': id from strategies.json + version + parameter fingerprint."""
-    sid = "?"
-    try:
-        sid = json.load(open(os.path.join(HERE, "strategies.json"))).get("active", "?")
-    except (OSError, ValueError):
-        pass
-    return f"{sid} v{strategy.VERSION} {strategy.fingerprint(P)}"
+    """e.g. 'S1 v1.0 ea6baed8d9d9': strategy id + version + parameter fingerprint."""
+    return f"{SID} v{strategy.VARIANTS[SID]['version']} {strategy.fingerprint(P)}"
 
 
 def log(row):
@@ -161,6 +171,7 @@ def describe(s):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--strategy", default="S1", choices=sorted(strategy.VARIANTS), help="which strategy to run (default S1)")
     ap.add_argument("--trade", action="store_true", help="send orders to the Alpaca PAPER account")
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--reset-halt", action="store_true")
@@ -168,7 +179,10 @@ def main():
     ap.add_argument("--halt-dd", type=float, default=None,
                     help="override the signed-off drawdown halt, e.g. 0.25 (can only be stricter)")
     a = ap.parse_args()
-    load_env(os.path.join(HERE, ".env"))
+    configure(a.strategy)
+    env = os.path.join(HERE, f".env.{SID}")
+    load_env(env if os.path.exists(env) else os.path.join(HERE, ".env"))
+    print(f"Strategy {strategy_tag()} · {strategy.VARIANTS[SID]['name']}")
     st = load_state()
 
     if a.reset_halt:
@@ -226,14 +240,16 @@ def main():
         eq_now = record_close(why)
         log(dict(time=now, bar=s["bar"], action="EXIT", price=s["close"], detail=why))
         print(f">>> EXIT ({why})")
-        st.update(stop=None, best_close=None, entry_px=None, entry_time=None, stop_order_id=None, entry_equity=None)
+        st.update(stop=None, best_close=None, entry_px=None, entry_time=None, stop_order_id=None, entry_equity=None,
+                  scaled=False)
         return eq_now
 
     # a resting stop filled on Alpaca since the last run
     if qty * s["close"] <= 10 and st["stop"] is not None:
         record_close("stop order filled on Alpaca")
         log(dict(time=now, bar=s["bar"], action="EXIT", price=s["close"], detail="stop order filled on Alpaca"))
-        st.update(stop=None, best_close=None, entry_px=None, entry_time=None, stop_order_id=None, entry_equity=None)
+        st.update(stop=None, best_close=None, entry_px=None, entry_time=None, stop_order_id=None, entry_equity=None,
+                  scaled=False)
 
     # survival limits (pre-registered in the sign-off)
     h, warns, summ = health(st, equity, lim)
@@ -247,7 +263,8 @@ def main():
         if qty * s["close"] > 10: flatten(f"survival limit: {h}")
         log(dict(time=now, bar=s["bar"], action="HALT", price=s["close"], detail=h))
     if st["halted"]:
-        print(f"HALTED by survival limit ({h or 'see bot_log.csv'}). Review, then run: python bot.py --reset-halt")
+        print(f"HALTED by survival limit ({h or 'see ' + os.path.basename(LOG)}). Review, then run: "
+              f"python bot.py --strategy {SID} --reset-halt")
         save_state(st); return
 
     in_pos = qty * s["close"] > 10      # ignore dust
@@ -265,6 +282,21 @@ def main():
         elif s["close"] <= st["stop"]:
             flatten(f"stop {st['stop']:,.0f} breached")
         else:
+            # S2: partial profit-take once per trade, then the stop on the rest goes to breakeven or better
+            tp = P.get("tp_atr")
+            if tp and new_bar and not st.get("scaled") and st.get("entry_px") and s["close"] >= st["entry_px"] + tp * s["atr"]:
+                for o in c.open_orders(): c.cancel(o["id"])
+                time.sleep(1)
+                sell = qty * P["tp_frac"]
+                c.market_sell_qty(sell, f"{SID}-tp-{s['bar'][:13]}")
+                time.sleep(2)
+                p_now = c.position()
+                qty = float(p_now["qty"]) if p_now else 0.0
+                st["scaled"] = True
+                st["stop"] = max(st["stop"], st["entry_px"])
+                log(dict(time=now, bar=s["bar"], action="TAKE_PROFIT", price=s["close"],
+                         detail=f"sold {sell:.6f} BTC ({P['tp_frac']:.0%}) at +{tp} ATR; stop -> {st['stop']:,.0f}"))
+                print(f">>> TAKE PROFIT: sold {P['tp_frac']:.0%}, stop on the rest moved to {st['stop']:,.0f}")
             # keep exactly one resting stop-limit at the current stop level
             orders = c.open_orders()
             have = [o for o in orders if o["type"] == "stop_limit" and o["side"] == "sell"]
@@ -272,7 +304,7 @@ def main():
             if not ok:
                 for o in orders: c.cancel(o["id"])
                 time.sleep(1)
-                o = c.stop_limit_sell(qty, st["stop"], st["stop"] * 0.98, f"flow-stop-{int(time.time())}")
+                o = c.stop_limit_sell(qty, st["stop"], st["stop"] * 0.98, f"{SID}-stop-{int(time.time())}")
                 st["stop_order_id"] = o["id"]
                 log(dict(time=now, bar=s["bar"], action="STOP", price=st["stop"], detail=f"qty {qty:.6f}"))
                 print(f">>> stop-limit set at {st['stop']:,.0f}")
@@ -284,7 +316,7 @@ def main():
             else:
                 usd = min(s["frac"] * equity, a.max_notional, float(acct.get("non_marginable_buying_power") or acct["cash"]) * 0.99)
                 if usd >= 10:
-                    o = c.market_buy_notional(usd, f"flow-entry-{s['bar'][:13]}")
+                    o = c.market_buy_notional(usd, f"{SID}-entry-{s['bar'][:13]}")
                     for _ in range(20):
                         time.sleep(1.5)
                         o = c.order(o["id"])
@@ -293,9 +325,9 @@ def main():
                     p = c.position()
                     q = float(p["qty"]) if p else 0.0
                     st.update(entry_px=fill, best_close=fill, entry_time=now, stop=fill - P["stop_atr"] * s["atr"],
-                              entry_equity=equity)
+                              entry_equity=equity, scaled=False)
                     if q > 0:
-                        so = c.stop_limit_sell(q, st["stop"], st["stop"] * 0.98, f"flow-stop-{int(time.time())}")
+                        so = c.stop_limit_sell(q, st["stop"], st["stop"] * 0.98, f"{SID}-stop-{int(time.time())}")
                         st["stop_order_id"] = so["id"]
                     log(dict(time=now, bar=s["bar"], action="ENTRY", price=fill,
                              detail=f"${usd:,.0f} ({s['frac']:.0%} target), qty {q:.6f}, stop {st['stop']:,.0f}"))

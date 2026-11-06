@@ -38,7 +38,7 @@ DEFAULTS = dict(
     trail_atr=8.0,      # chandelier trailing stop (ATRs below best close)
     sizing="vol",       # "vol": scale exposure to hit target_vol; "risk": fixed % of equity at risk
     target_vol=0.3,     # annualised volatility target for the position (BTC itself runs ~50-70%).
-                        # 0.3 chosen for drawdown: same Sharpe as 0.5 with ~2/3 of the drawdown (SIGNOFF.md)
+                        # 0.3 chosen for drawdown: same Sharpe as 0.5 with ~2/3 of the drawdown (reports/SIGNOFF_S1.md)
     allow_short=False,  # set by the venue profile (see PROFILES)
     # consolidation pause (None = off): block NEW entries when the market is range-bound
     chop_adx_min=20,    # require ADX(14) >= this (ADX < 20 = range-bound -> pause)
@@ -58,6 +58,15 @@ def fingerprint(p=None):
     import hashlib, json
     p = DEFAULTS if p is None else p
     return hashlib.sha256(json.dumps(p, sort_keys=True, default=str).encode()).hexdigest()[:12]
+
+
+# Strategies that can be signed off and traded. Each id maps to an exact parameter set (and so a fingerprint).
+VARIANTS = {
+    "S1": dict(version="1.0", profile="spot_long_flat", extra={},
+               name="Flow Regime v1.0, spot long/flat"),
+    "S2": dict(version="1.1", profile="spot_long_flat", extra=dict(tp_atr=2.0, tp_frac=0.33),
+               name="Flow Regime v1.1: v1.0 + take 1/3 profit at +2 ATR, rest to breakeven"),
+}
 
 
 # Venue profiles. Spot venues (Alpaca) can't short: bear regime = cash. Perp/futures venues trade both ways.
@@ -113,3 +122,9 @@ def signal(f, p):
         "exit_short": (dev > -sx) | (chop if ce else False),
     }
     return {k: v.fillna(False).to_numpy() for k, v in out.items()}
+
+
+def params(sid):
+    """Full parameter dict for a strategy id (S1, S2, ...)."""
+    v = VARIANTS[sid]
+    return {**DEFAULTS, **PROFILES[v["profile"]], **v["extra"]}

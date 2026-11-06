@@ -93,7 +93,7 @@ def bootstrap_sharpe(eq, n=2000, block=20, seed=7):
     return np.percentile(out, [5, 50, 95]), float(np.mean(np.array(out) > 0))
 
 
-def walk_forward(fc, years, profile):
+def walk_forward(fc, years, profile, extra=None):
     keys = list(WF_GRID)
     chunks, picks = [], []
     for y in years:
@@ -102,7 +102,7 @@ def walk_forward(fc, years, profile):
             d = dict(zip(keys, vals))
             if d["exit_dev"] > d["entry_dev"]: continue
             sa, ta = d.pop("stop")
-            p = prof(profile, **d, stop_atr=sa, trail_atr=ta)
+            p = prof(profile, **d, stop_atr=sa, trail_atr=ta, **(extra or {}))
             s = run(fc, p, slice("2020-06-01", f"{y - 1}-12-31"), COSTS[profile]).stats["sharpe"]
             if s > best_s: best, best_s = p, s
         r = run(fc, best, slice(f"{y}-01-01", f"{y}-12-31"), COSTS[profile])

@@ -1,16 +1,16 @@
 # Strategy log
 
 Every BTC strategy considered for this bot, its status, and the evidence behind the decision. Machine-readable copy: `strategies.json`.
-The bot stamps each row of `bot_log.csv` with the active strategy id, version and fingerprint, so live results always trace back to an entry here.
+The bot stamps each row of `bot_log_<id>.csv` with the strategy id, version and fingerprint, so live results always trace back to an entry here.
 
 Status: **PROCEED** = paper trade it · **CANDIDATE** = passed tests, needs your decision · **PARKED** = sound but blocked · **REJECTED** = failed, do not trade.
 
-**Active in the bot:** `S1`
+**Being paper traded:** `S1`, `S2`
 
 | ID | Strategy | Status | Decided | Key evidence | Next step |
 |---|---|---|---|---|---|
-| S1 | Flow Regime v1.0, spot long/flat (Alpaca) | **PROCEED** | 2026-11-06 | 2023-26 out-of-sample: win 45%, Sharpe 1.48, max DD -18.6%, +28%/yr. Full: win 42%, DD -20.5%. Walk-forward 2022-now: +7.8%/yr, Sharpe 0.55, DD -26.8%. Monte Carlo 1-in-20 DD -34%. Beat plain trend rules out-of-sample. | Your sign-off (python signoff.py --approve), then paper trade 3-6 months against the survival limits. |
-| S2 | Flow Regime v1.1 = v1.0 + take 1/3 profit at +2 ATR, rest to breakeven | **CANDIDATE** | 2026-11-06 | Win 67% (2020-22) / 65% (2023-26); max DD -11% / -14%; Monte Carlo 1-in-20 DD -28%; +12% / +17% per yr. Every profit-take level tested raised win rate and cut drawdown. Lower return than S1 at equal risk. | Your choice vs S1. If chosen: walk-forward, Monte Carlo limits, new sign-off, bot partial-sell support. |
+| S1 | Flow Regime v1.0, spot long/flat (Alpaca) | **PROCEED** | 2026-11-06 | 2023-26 out-of-sample: win 45%, Sharpe 1.48, max DD -18.6%, +28%/yr. Full: win 42%, DD -20.5%. Walk-forward 2022-now: +7.8%/yr, Sharpe 0.55, DD -26.8%. Monte Carlo 1-in-20 DD -34%. Beat plain trend rules out-of-sample. | Sign off (python signoff.py --strategy S1 --approve), then paper trade in Alpaca paper account #1 alongside S2 for 3-6 months. |
+| S2 | Flow Regime v1.1 = v1.0 + take 1/3 profit at +2 ATR, rest to breakeven | **PROCEED** | 2026-11-06 | Win 67% (2020-22) / 65% (2023-26); max DD -10.6% / -13.9%; Monte Carlo 1-in-20 DD -28%; avg loss -3.6%, payoff 1.5x. Walk-forward 2022-now weaker than S1: +3.2%/yr, Sharpe 0.28, DD -27.5% (S1: +7.8%, 0.55, -26.8%). | Sign off (python signoff.py --strategy S2 --approve), then paper trade in Alpaca paper account #2 alongside S1. Compare with python compare.py --parity. |
 | S3 | Flow Regime perp long/short (bull long, bear short, range pause) | **PARKED** | 2026-11-05 | 2022 bear year about 0% vs -17% (S1) and -65% (BTC). But shorts added about 0 in 2023-26: crash insurance, not profit. Needs a venue that can short (IBKR CME micro futures or Coinbase/Kraken US perps). | Revisit after S1/S2 has a live paper record. |
 | S4 | Order-book entry timing (limit orders when the book favours us) | **PARKED** | 2026-11-06 | Not tested. Could save a few basis points per trade on S1/S2 entries. Execution improvement, not a strategy. | Low priority; only after paper trading shows fill quality. |
 | R1 | Order Book Imbalance (OBI) scalping, 2-4 tick targets | **REJECTED** | 2026-11-06 | Fees about $76-380 per BTC round trip vs a $0.20-0.40 target: loses even at 100% win rate. Needs microsecond colocation; walls get spoofed. No tick-level book history to backtest. | None. |
@@ -34,4 +34,4 @@ Status: **PROCEED** = paper trade it · **CANDIDATE** = passed tests, needs your
 1. Add an entry to `strategies.json` with status `CANDIDATE` and its source.
 2. Test it the same way: choose settings on 2020-22 only, report 2023-26 untouched, include costs, and show win rate, average win/loss and Monte Carlo drawdown.
 3. Record the verdict and evidence, then regenerate this file: `python strategy_log.py`.
-4. Only a signed-off fingerprint (`python signoff.py --approve`) can trade.
+4. Add it to `VARIANTS` in `btc_bot/strategy.py`; only a signed-off fingerprint (`python signoff.py --strategy <id> --approve`) can trade.

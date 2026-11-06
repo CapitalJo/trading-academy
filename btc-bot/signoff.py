@@ -2,10 +2,10 @@
 """
 Strategy sign-off pack.
 
-  python signoff.py                      build reports/SIGNOFF.md + reports/survival_limits.json
-  python signoff.py --approve "Name"     record your approval of THIS exact parameter set (SIGNED_OFF.json)
+  python signoff.py --strategy S1                  build reports/SIGNOFF_S1.md + reports/survival_limits_S1.json
+  python signoff.py --strategy S2 --approve "Name" record your approval of THIS exact parameter set (SIGNED_OFF_S2.json)
 
-The bot refuses to place orders unless SIGNED_OFF.json matches the strategy's current fingerprint.
+The bot refuses to place orders for a strategy unless SIGNED_OFF_<id>.json matches its current fingerprint.
 Change any parameter and the fingerprint changes, so the strategy needs a fresh sign-off.
 
 The survival limits are fixed here, before any live trading, from the backtest and Monte Carlo
@@ -20,9 +20,10 @@ sys.path.insert(0, HERE)
 from btc_bot import data, features, strategy, backtest as bt
 
 OUT = os.path.join(HERE, "reports")
-SIGNED = os.path.join(HERE, "SIGNED_OFF.json")
 VENUE = "spot_long_flat"                    # what the Alpaca bot runs
-P = {**strategy.DEFAULTS, **strategy.PROFILES[VENUE]}
+SID = "S1"
+P = strategy.params(SID)
+SIGNED = os.path.join(HERE, f"SIGNED_OFF_{SID}.json")
 COSTS = bt.Costs(25, 5)
 IS, OOS, FULL = slice("2020-06-01", "2022-12-31"), slice("2023-01-01", None), slice("2020-06-01", None)
 
@@ -67,6 +68,14 @@ def binom_low(n, p, q=0.05):
     return k
 
 
+def tp_rule(p):
+    if not p.get("tp_atr"):
+        return ""
+    return (f"4. **Partial profit-take:** when a bar closes at entry + **{p['tp_atr']} × ATR** or higher, sell **{p['tp_frac']:.0%}** "
+            "of the position at the next open (once per trade). The stop on the rest moves up to the entry price "
+            "(breakeven) or higher.\n\n")
+
+
 def describe_rules(p):
     return f"""**Data:** Binance BTCUSDT perpetual and spot 1h klines (taker buy volume), aggregated into **{p['timeframe']} bars**. Decisions are made only on closed bars.
 
@@ -88,15 +97,20 @@ Example: BTC running at 60% volatility → 50% of equity.
 2. **Initial stop:** entry − **{p['stop_atr']} × ATR({p['atr_n']})**. Rests on the exchange as a stop-limit order.
 3. **Trailing stop:** highest close since entry − **{p['trail_atr']} × ATR**, ratchets up only.
 
-Consolidation never forces an exit. Testing showed that exiting on consolidation hurts (REPORT.md §4).
+{tp_rule(p)}Consolidation never forces an exit. Testing showed that exiting on consolidation hurts (REPORT.md §4).
 
 **Not used** (tested, no benefit): funding-rate veto, shorting on spot, tight stops, spot-only flow."""
 
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--strategy", default="S1", choices=sorted(strategy.VARIANTS))
     ap.add_argument("--approve", metavar="NAME", help="record sign-off of the current parameter set")
     a = ap.parse_args()
+    global SID, P, SIGNED
+    SID, P = a.strategy, strategy.params(a.strategy)
+    SIGNED = os.path.join(HERE, f"SIGNED_OFF_{SID}.json")
+    VER = strategy.VARIANTS[SID]["version"]
     fp = strategy.fingerprint(P)
     os.makedirs(OUT, exist_ok=True)
 
@@ -123,7 +137,7 @@ def main():
 
     # --- survival limits (pre-registered)
     limits = dict(
-        version=strategy.VERSION, fingerprint=fp, venue=VENUE,
+        strategy=SID, version=VER, fingerprint=fp, venue=VENUE,
         dd_warn=round(min(dd_bt, -0.05) - 0.01, 2),               # beyond the worst backtest drawdown
         dd_halt=round(float(np.percentile(mcdd, 5)), 2),          # beyond 95% of Monte Carlo paths
         warn_consecutive_losses=int(np.percentile(streaks, 95)),
@@ -132,11 +146,11 @@ def main():
         avg_loss_review=round(1.5 * float(loss_r.mean()), 3),     # after >= 8 losing trades
         win_rate_review={str(n): binom_low(n, win) for n in (10, 15, 20, 30)},  # wins at/below this after n trades
     )
-    json.dump(limits, open(os.path.join(OUT, "survival_limits.json"), "w"), indent=2)
+    json.dump(limits, open(os.path.join(OUT, f"survival_limits_{SID}.json"), "w"), indent=2)
 
     md = []; add = md.append
-    add(f"# Strategy sign-off: BTC Flow Regime v{strategy.VERSION}\n")
-    add(f"Fingerprint **`{fp}`** · venue **Alpaca BTC/USD spot (long or cash)** · generated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · "
+    add(f"# Strategy sign-off: {SID}, {strategy.VARIANTS[SID]['name']} (v{VER})\n")
+    add(f"Strategy **{SID}** · fingerprint **`{fp}`** · venue **Alpaca BTC/USD spot (long or cash)** · generated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · "
         f"data {f.index[0]:%Y-%m-%d} → {f.index[-1]:%Y-%m-%d} · costs 0.25% fee + 0.05% slippage per side\n")
     add("> Educational research, not financial advice. Backtests are estimates. This document fixes, **before** live trading, "
         "what results count as \"the strategy is behaving as tested\" and what counts as \"it has stopped working\".\n")
@@ -149,9 +163,14 @@ def main():
     add("Code: `btc_bot/strategy.py` (rules), `btc_bot/features.py` (indicators), `btc_bot/backtest.py` (simulation), `bot.py` (execution).\n")
 
     add("## 2. Win rate: what to expect, and why it survives\n")
-    add(f"**The win rate is low by design: {win:.0%} overall ({(is_t.pnl > 0).mean():.0%} in-sample, {(oos_t.pnl > 0).mean():.0%} out-of-sample).** "
-        "The strategy survives on its **payoff ratio**, not its win rate. Losses are capped by the stop and the flow exit. Winners ride "
-        "multi-week trends.\n")
+    if win < 0.55:
+        add(f"**The win rate is low by design: {win:.0%} overall ({(is_t.pnl > 0).mean():.0%} in-sample, {(oos_t.pnl > 0).mean():.0%} out-of-sample).** "
+            "The strategy survives on its **payoff ratio**, not its win rate. Losses are capped by the stop and the flow exit. Winners ride "
+            "multi-week trends.\n")
+    else:
+        add(f"**Win rate {win:.0%} overall ({(is_t.pnl > 0).mean():.0%} in-sample, {(oos_t.pnl > 0).mean():.0%} out-of-sample).** "
+            "The early partial profit turns many trades that used to give back their gains into small wins. Losses are still capped by the "
+            "stop and the flow exit, and the rest of each position still rides multi-week trends. The trade-off is a smaller payoff per win.\n")
     add("| | Trades | Win rate | Avg win | Avg loss | Payoff (avg win ÷ avg loss) | Expectancy per trade | Worst trade |\n|---|---|---|---|---|---|---|---|")
     for lab, x in [("In-sample 2020-06 → 2022", is_t), ("**Out-of-sample 2023 → now**", oos_t), ("Full", t)]:
         w, l = x.ret[x.ret > 0], x.ret[x.ret <= 0]
@@ -167,9 +186,11 @@ def main():
         f"{int(np.median(streaks))}, 1-in-20 **{int(np.percentile(streaks, 95))}**, 1-in-100 {int(np.percentile(streaks, 99))} "
         f"(backtest actual: {max_streak((t.pnl <= 0).to_numpy())}). P(30 trades lose money overall): {(fin < 1).mean():.1%}.\n")
     add("**Why earlier strategies often fail on win rate:** high-win-rate systems usually take small, frequent profits and "
-        "rare large losses. They look great until the large loss arrives, and then the drawdown doesn't survive. This one is built the "
-        "other way round: frequent small, capped losses and rare large wins. Its failure mode is slow (a long string of small losses), "
-        "which the limits in §5 catch early.\n")
+        "rare large losses. They look great until the large loss arrives, and then the drawdown doesn't survive. "
+        + ("This one is built the other way round: frequent small, capped losses and rare large wins. " if win < 0.55 else
+           f"This one keeps the loss side capped (worst trade {pct(t.ret.min())}, average loss {pct(loss_r.mean())}) while banking part of each "
+           "winner early, so its high win rate doesn't depend on avoiding a rare big loss. ")
+        + "Its failure mode is slow (a long string of small losses), which the limits in §5 catch early.\n")
 
     add("## 3. Drawdown: what to expect, and how bad it can get\n")
     add("| Measure | Value |\n|---|---|")
@@ -200,7 +221,7 @@ def main():
             f"{pct(r_f.stats['max_dd'])} | {pct(np.percentile(block_mc_dd(r_f.equity, n=3000), 5))} |")
 
     add("\n## 5. Survival limits (fixed now, enforced by the bot)\n")
-    add("These are written to `reports/survival_limits.json`. On sign-off they're copied into `SIGNED_OFF.json`, which the bot reads.\n")
+    add(f"These are written to `reports/survival_limits_{SID}.json`. On sign-off they're copied into `SIGNED_OFF_{SID}.json`, which the bot reads.\n")
     add("| Check | Limit | Bot action | Why this number |\n|---|---|---|---|")
     add(f"| Drawdown from equity peak | {pct(limits['dd_warn'])} | **Warn** in log/console | Beyond the worst backtest drawdown ({pct(dd_bt)}) |")
     add(f"| Drawdown from equity peak | {pct(limits['dd_halt'])} | **Halt**: flatten, stop trading | Beyond 95% of Monte Carlo paths |")
@@ -216,7 +237,8 @@ def main():
     try:
         import research
         fc = research.FeatCache(df)
-        wf_eq, _ = research.walk_forward(fc, list(range(2022, dt.date.today().year + 1)), VENUE)
+        wf_eq, _ = research.walk_forward(fc, list(range(2022, dt.date.today().year + 1)), VENUE,
+                                         extra={k: P[k] for k in ("tp_atr", "tp_frac", "target_vol") if k in P})
         s = bt.stats(wf_eq, pd.DataFrame())
         wf_note = f" Walk-forward 2022 → now (parameters re-chosen yearly from past data only): CAGR {pct(s['cagr'])}, Sharpe {s['sharpe']:.2f}, max DD {pct(s['max_dd'])}."
     except Exception as e:  # pragma: no cover
@@ -237,16 +259,16 @@ def main():
             + ("**matches this strategy.**" if ok else "**does NOT match: parameters changed since sign-off.**"))
     else:
         add("No approval on file. The bot runs dry only.")
-    add(f"\nTo approve exactly this version (fingerprint `{fp}`):\n\n```\npython signoff.py --approve \"Your Name\"\n```\n")
+    add(f"\nTo approve exactly this version (fingerprint `{fp}`):\n\n```\npython signoff.py --strategy {SID} --approve \"Your Name\"\n```\n")
 
-    with open(os.path.join(OUT, "SIGNOFF.md"), "w") as fh: fh.write("\n".join(md))
-    print("\n".join(md)); print(f"\nWrote {OUT}/SIGNOFF.md and survival_limits.json")
+    with open(os.path.join(OUT, f"SIGNOFF_{SID}.md"), "w") as fh: fh.write("\n".join(md))
+    print("\n".join(md)); print(f"\nWrote {OUT}/SIGNOFF_{SID}.md and survival_limits_{SID}.json")
 
     if a.approve:
         rec = dict(name=a.approve, date=dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-                   version=strategy.VERSION, fingerprint=fp, params=P, limits=limits)
+                   strategy=SID, version=VER, fingerprint=fp, params=P, limits=limits)
         json.dump(rec, open(SIGNED, "w"), indent=2, default=str)
-        print(f"\nApproved by {a.approve}: fingerprint {fp} written to SIGNED_OFF.json")
+        print(f"\nApproved by {a.approve}: {SID} fingerprint {fp} written to {os.path.basename(SIGNED)}")
 
 
 if __name__ == "__main__":

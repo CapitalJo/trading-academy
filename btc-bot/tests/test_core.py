@@ -76,6 +76,22 @@ class Accounting(unittest.TestCase):
         tr = r.trades.iloc[0]
         self.assertEqual(tr.reason, "stop"); self.assertAlmostEqual(tr.exit, 80.0)   # gapped below 90 -> open
 
+    def test_partial_take_profit_then_breakeven(self):
+        # entry 100, rises to 125 (>= +2 ATR with ATR 10), then falls to 90: S2 banks 1/3 and exits the rest at breakeven
+        f = self.frame([100, 100, 115, 125, 125, 100], [100, 100, 114, 124, 99, 90], [100, 110, 125, 125, 100, 90])
+        sig = {k: np.zeros(6, bool) for k in ("entry_long", "exit_long", "entry_short", "exit_short")}
+        sig["entry_long"][0] = True
+        p = {**strategy.params("S2"), "target_vol": 1.0}
+        r = bt.run(f, sig, p, costs=bt.Costs(0, 0), start_equity=10_000)
+        tr = r.trades.iloc[0]
+        self.assertEqual(tr.reason, "stop")
+        self.assertAlmostEqual(tr.exit, 100.0)                         # rest stopped at breakeven
+        self.assertAlmostEqual(r.equity.iloc[-1], 10_000 + 0.33 * 100 * 25, delta=0.5)   # 1/3 sold at 125
+
+    def test_s1_s2_fingerprints(self):
+        self.assertEqual(strategy.fingerprint(strategy.params("S1")), strategy.fingerprint({**strategy.DEFAULTS, **strategy.PROFILES["spot_long_flat"]}))
+        self.assertNotEqual(strategy.fingerprint(strategy.params("S1")), strategy.fingerprint(strategy.params("S2")))
+
     def test_fees_round_trip(self):
         f = self.frame([100] * 5, [100] * 5, [100] * 5)
         sig = {k: np.zeros(5, bool) for k in ("entry_long", "exit_long", "entry_short", "exit_short")}
