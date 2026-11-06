@@ -22,28 +22,35 @@ Each 4h close, the market is classified into a regime that decides **which side 
 | **RANGE** | ADX < 20 (consolidation), or mixed signals | **pause**: no new trades. Open trades keep their normal exits |
 
 Exits: flow crosses back 0.5% to the other side, or a wide ATR disaster/trailing stop (5 ATR initial, 8 ATR trail). Size uses
-**volatility targeting** (50% annualised), capped at 100% of equity with no leverage. Exiting positions *because* a range started was
+**volatility targeting** (30% annualised), capped at 100% of equity with no leverage. Exiting positions *because* a range started was
 tested and hurts (REPORT §4), so the pause only blocks new entries.
 
-## Results snapshot (after costs)
-| | CAGR | Sharpe | Max DD | 2022 (bear year) |
-|---|---|---|---|---|
-| Spot long/flat (Alpaca), out-of-sample 2023 → Nov 2026 | +35.0% | 1.41 | −24.9% | — |
-| Perp long/short, out-of-sample 2023 → Nov 2026 | +31.8% | 1.03 | −28.9% | — |
-| Buy & hold, same period | +51.0% | 1.12 | −53.4% | — |
-| Spot long/flat, full 2020-06 → now | +28.9% | 1.20 | −30.7% | −25.6% |
-| Perp long/short, full 2020-06 → now | +32.9% | 1.07 | −28.9% | **−2.3%** |
-| Buy & hold, full period | +39.3% | 0.85 | −77.1% | −64.7% |
-| Walk-forward 2022 → now (yearly re-fit): long/flat / long/short | +7.5% / +11.4% | 0.44 / 0.51 | −38% / −39% | |
-| Buy & hold, 2022 → now | +11.9% | 0.47 | −67.2% | |
+## Results snapshot: v1.0 (target vol 30%, after costs)
+| | CAGR | Sharpe | Win rate | Max DD | 2022 (bear year) |
+|---|---|---|---|---|---|
+| **Spot long/flat (Alpaca)**, out-of-sample 2023 → Nov 2026 | +28.4% | 1.48 | 45% | −18.6% | — |
+| Spot long/flat, full 2020-06 → now | +22.0% | 1.26 | 42% | −20.5% | −17.1% |
+| Spot long/flat, walk-forward 2022 → now (yearly re-fit) | +7.8% | 0.55 | — | −26.8% | |
+| Perp long/short (needs a short venue), full 2020-06 → now | +25.2% | 1.11 | 44% | −22.4% | **+0.0%** |
+| Buy & hold BTC, full period | +39.3% | 0.85 | — | −77.1% | −64.7% |
 
-What this means:
-- **Bear markets:** shorting roughly neutralised 2022 (−2% vs −26% long-only, −65% buy-and-hold). But out-of-sample in 2023–26,
-  short trades added nothing (−2.6% total). Shorts mainly work as crash insurance, not as a profit engine.
-- **Consolidation pause:** about a third of the time is classified RANGE. Pausing improved the spot strategy (OOS Sharpe 1.26 → 1.41,
-  max DD −31% → −25%) and was roughly neutral for long/short. It's a modest filter, not a big edge.
-- **Overall:** buy-and-hold made more money in this mostly-bull window. The strategy's advantage is avoiding most of the crashes.
-  The walk-forward test is much weaker than the fixed-parameter numbers. See REPORT.md §10 for limitations.
+- **Win rate is low by design (36–45%).** The edge is the payoff ratio: average loss about −3.5%, held steady in-sample and
+  out-of-sample; average win about +15%.
+- **Plan for a −34% drawdown**, the Monte Carlo 1-in-20 path, not the −20.5% backtest figure.
+- **Bear markets:** on Alpaca the bot holds cash. Perp long/short roughly neutralised 2022, but its shorts added nothing in 2023–26.
+- **Consolidation pause:** about a third of the time is RANGE. Pausing improved the spot version modestly.
+- Buy-and-hold made more money in this mostly-bull window. The strategy's advantage is avoiding most of the crashes.
+
+## Sign-off and survival limits
+`python signoff.py` writes [`reports/SIGNOFF.md`](reports/SIGNOFF.md): the exact rules, the win-rate and drawdown evidence, and
+**survival limits fixed before any live trading**:
+- warn at −22% drawdown, **halt at −34%**;
+- warn at 9 consecutive losses, **halt at 13**;
+- **halt** on any single loss worse than −8.8%;
+- review if the average loss or the win rate falls outside its backtest band.
+
+Once you've reviewed it, run `python signoff.py --approve "Your Name"`. That writes `SIGNED_OFF.json` with the strategy's parameter
+**fingerprint**. `bot.py --trade` refuses to run unless the fingerprint matches, so changing any parameter needs a new sign-off.
 
 ## Layout
 ```
@@ -54,8 +61,9 @@ btc_bot/strategy.py    regime classifier (BULL/BEAR/RANGE), Flow Regime rules, v
 btc_bot/backtest.py    bar-by-bar engine: next-open fills, intrabar stops with gap fills, fees, vol sizing
 btc_bot/alpaca.py      paper-only Alpaca client (stdlib)
 research.py            full study -> reports/REPORT.md, equity/drawdown SVGs, trades/grid CSVs
+signoff.py             sign-off pack (reports/SIGNOFF.md), survival limits, --approve
 bot.py                 the trading bot (dry-run by default)
-tests/                 no-lookahead, regime consistency, fill/fee accounting, paper-only safety
+tests/                 no-lookahead, regime consistency, fill/fee accounting, survival limits, sign-off, paper-only safety
 ```
 
 ## Quick start
@@ -69,14 +77,15 @@ python bot.py                       # dry run: shows the live signal, no orders
 ### Paper trading
 1. In Alpaca, switch to the **Paper** account and generate API keys.
 2. `cp .env.example .env` and paste the keys.
-3. `python bot.py --status` checks the connection.
-4. `python bot.py --trade` runs one decision cycle and places paper orders if the signal says so.
-5. Automate it **hourly**. Decisions happen only on closed 4h bars, so extra runs are harmless:
+3. Review `reports/SIGNOFF.md`, then `python signoff.py --approve "Your Name"`.
+4. `python bot.py --status` checks the connection and shows live results against the survival limits.
+5. `python bot.py --trade` runs one decision cycle and places paper orders if the signal says so.
+6. Automate it **hourly**. Decisions happen only on closed 4h bars, so extra runs are harmless:
    - macOS/Linux cron: `5 * * * * cd /path/to/btc-bot && /usr/bin/python3 bot.py --trade >> bot_output.txt 2>&1`
    - Windows: Task Scheduler → run `run_bot.bat` every hour.
 
-Options: `--max-notional 25000` caps dollars per position. `--halt-dd 0.35` sets the kill switch: flatten and stop if equity
-falls 35% from its peak, beyond the backtest's worst drawdown. `--reset-halt` re-arms it after you've reviewed what happened.
+Options: `--max-notional 25000` caps dollars per position. `--halt-dd 0.25` makes the drawdown halt stricter than the signed-off
+limit (it can't be loosened). `--reset-halt` re-arms the bot after a survival-limit halt, once you've reviewed what happened.
 Every action is logged to `bot_log.csv`. Bot state is kept in `state.json`.
 
 ### Data notes

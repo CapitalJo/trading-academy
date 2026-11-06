@@ -85,6 +85,33 @@ class Accounting(unittest.TestCase):
         self.assertAlmostEqual(r.equity.iloc[-1], 10_000 - 25 - 25, delta=0.1)   # 0.25% in, 0.25% out
 
 
+class SurvivalLimits(unittest.TestCase):
+    LIM = dict(dd_warn=-0.22, dd_halt=-0.34, warn_consecutive_losses=9, max_consecutive_losses=13,
+               worst_single_loss=-0.088, avg_loss_review=-0.052, win_rate_review={"10": 1, "15": 2})
+
+    def check(self, rets, equity=100.0, peak=100.0):
+        import bot
+        return bot.health({"closed_trades": [{"ret": r} for r in rets], "peak_equity": peak}, equity, self.LIM)
+
+    def test_normal_is_quiet(self):
+        h, w, _ = self.check([0.15, -0.03, -0.04, 0.2, -0.03])
+        self.assertIsNone(h); self.assertEqual(w, [])
+
+    def test_streak_warn_then_halt(self):
+        self.assertIsNone(self.check([0.1] + [-0.02] * 9)[0])
+        self.assertTrue(any("consecutive" in x for x in self.check([0.1] + [-0.02] * 9)[1]))
+        self.assertIn("consecutive", self.check([0.1] + [-0.02] * 13)[0])
+
+    def test_drawdown_and_single_loss(self):
+        self.assertTrue(self.check([], equity=75)[1])            # -25% -> warn
+        self.assertIn("drawdown", self.check([], equity=60)[0])   # -40% -> halt
+        self.assertIn("single-trade", self.check([-0.12])[0])
+
+    def test_signoff_fingerprint_changes_with_params(self):
+        p = dict(strategy.DEFAULTS)
+        self.assertNotEqual(strategy.fingerprint(p), strategy.fingerprint({**p, "target_vol": 0.5}))
+
+
 class Safety(unittest.TestCase):
     def test_live_url_refused(self):
         with self.assertRaises(SystemExit):

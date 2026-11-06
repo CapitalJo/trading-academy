@@ -37,7 +37,8 @@ DEFAULTS = dict(
     stop_atr=5.0,       # initial protective stop (ATRs below entry) -- a disaster stop
     trail_atr=8.0,      # chandelier trailing stop (ATRs below best close)
     sizing="vol",       # "vol": scale exposure to hit target_vol; "risk": fixed % of equity at risk
-    target_vol=0.5,     # annualised volatility target for the position (BTC itself runs ~50-70%)
+    target_vol=0.3,     # annualised volatility target for the position (BTC itself runs ~50-70%).
+                        # 0.3 chosen for drawdown: same Sharpe as 0.5 with ~2/3 of the drawdown (SIGNOFF.md)
     allow_short=False,  # set by the venue profile (see PROFILES)
     # consolidation pause (None = off): block NEW entries when the market is range-bound
     chop_adx_min=20,    # require ADX(14) >= this (ADX < 20 = range-bound -> pause)
@@ -48,6 +49,16 @@ DEFAULTS = dict(
     short_slope=True,       # also require EMA(ema_slow) to be falling (stops shorting bull-market dips)
     chop_exit=False,        # also EXIT open positions in a range (tested: hurts, so off)
 )
+
+VERSION = "1.0"
+
+
+def fingerprint(p=None):
+    """Short hash of the exact parameter set. The bot only trades a fingerprint you signed off."""
+    import hashlib, json
+    p = DEFAULTS if p is None else p
+    return hashlib.sha256(json.dumps(p, sort_keys=True, default=str).encode()).hexdigest()[:12]
+
 
 # Venue profiles. Spot venues (Alpaca) can't short: bear regime = cash. Perp/futures venues trade both ways.
 PROFILES = {

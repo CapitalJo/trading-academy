@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "fingerprint": "ea6baed8d9d9",
+  "venue": "spot_long_flat",
+  "dd_warn": -0.22,
+  "dd_halt": -0.34,
+  "warn_consecutive_losses": 9,
+  "max_consecutive_losses": 13,
+  "worst_single_loss": -0.088,
+  "avg_loss_review": -0.052,
+  "win_rate_review": {
+    "10": 1,
+    "15": 2,
+    "20": 4,
+    "30": 7
+  }
+}
