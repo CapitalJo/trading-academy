@@ -112,6 +112,15 @@
       "source": "AI-generated suggestion (screenshots); claimed market-neutral, low drawdown",
       "evidence": "Fails its own cointegration requirement: Engle-Granger ADF t = -1.2 (2020-22), -2.3 (2023-26), -2.5 (full) vs -3.34 needed; cointegrated in only 10% of rolling 1-year windows. As described (daily): win 13% / 42%, -31% / -16% per yr, DD -66% / -50%. Grid: 8% of 48 configs profitable 2023-26 on daily and 4h bars. ETH/BTC trended down for years, so 'buy the cheap one' kept losing. Needs shorting (not possible on Alpaca crypto). research_alternatives/pairs_btc_eth.py",
       "next": "None for BTC/ETH. Stock pairs (KO/PEP etc.) are a separate project: Alpaca can short stocks, but each pair must pass the same cointegration and out-of-sample tests."
+    },
+    {
+      "id": "R9",
+      "name": "Session Liquidity Sweep (Asian 00-07 UTC range; London/NY sweep-and-reclaim on 1m; stop $20 beyond wick; 50% at midpoint, rest at opposite boundary; 1% risk; 2-loss daily stop)",
+      "status": "REJECTED",
+      "decided": "2026-11-06",
+      "source": "AI-generated suggestion (screenshots); claimed 48-55% win, 1:3-1:5 reward, minimal drawdown",
+      "evidence": "BTC perp 1m, 2,700+ trades, rules as written with cheap futures fees: win 23% (2020-22) / 18% (2023-26), -0.47R / -0.60R per trade, -87% / -93% per yr, DD -99.5% / -100%. Zero fees: win 21%, -0.01R per trade (no raw edge). Median stop 0.21% of price, so fees alone cost ~0.6R per trade. Weekdays-only, London-only, NY-only and breakeven variants all lose similarly. Forex not tested (no forex data in this project). research_alternatives/session_liquidity_sweep.py",
+      "next": "None for BTC."
     }
   ],
   "rejected_rules": [
