@@ -20,6 +20,7 @@ Status: **PROCEED** = paper trade it · **CANDIDATE** = passed tests, needs your
 | R5 | Plain trend following (above 200 EMA / 200-day average) | **REJECTED** | 2026-11-06 | Looked best in 2020-22 (Sharpe 1.32) and collapsed in 2023-26 (Sharpe 0.50, DD -44%). 150-190 trades out-of-sample = fee drag. research_alternatives/trend_baselines.py | None. Kept as the benchmark S1 must keep beating. |
 | R6 | Spot-only taker flow signal | **REJECTED** | 2026-11-05 | 2023-26 Sharpe 0.54 vs 1.26 with perp flow. | None. |
 | R7 | Early v0: z-scored flow with 2-day holds | **REJECTED** | 2026-11-05 | 2023-26 about flat (Sharpe 0.18); 151 trades at 0.6% round trip ate the edge. | None. Led to the slower S1 design. |
+| R8 | Pairs trading / statistical arbitrage: ETH vs BTC (z-score of the spread, enter |z|>2, exit at 0) | **REJECTED** | 2026-11-06 | Fails its own cointegration requirement: Engle-Granger ADF t = -1.2 (2020-22), -2.3 (2023-26), -2.5 (full) vs -3.34 needed; cointegrated in only 10% of rolling 1-year windows. As described (daily): win 13% / 42%, -31% / -16% per yr, DD -66% / -50%. Grid: 8% of 48 configs profitable 2023-26 on daily and 4h bars. ETH/BTC trended down for years, so 'buy the cheap one' kept losing. Needs shorting (not possible on Alpaca crypto). research_alternatives/pairs_btc_eth.py | None for BTC/ETH. Stock pairs (KO/PEP etc.) are a separate project: Alpaca can short stocks, but each pair must pass the same cointegration and out-of-sample tests. |
 
 ## Rules tested and rejected inside the Flow Regime strategy
 

@@ -57,7 +57,8 @@ def _fetch_series(kind, dataset, symbol, interval, start, end, names):
     prefix = f"{BASE}/{'spot' if kind == 'spot' else 'futures/um'}"
     sub = f"{dataset}/{symbol}" + (f"/{interval}" if interval else "")
     stem = f"{symbol}-{interval}" if interval else f"{symbol}-{dataset}"
-    cdir = os.path.join(CACHE, kind, dataset, interval or "")
+    # BTCUSDT keeps its original cache path; other symbols get their own folder
+    cdir = os.path.join(CACHE, *(() if symbol == "BTCUSDT" else (symbol,)), kind, dataset, interval or "")
     os.makedirs(cdir, exist_ok=True)
     frames, today = [], dt.date.today()
     for y, m in _months(start, end):
