@@ -361,21 +361,112 @@ img,svg,video,canvas{max-width:100%}
 .arena-rules{background:var(--card2)!important}
 @media (max-width:480px){.arena-hook{font-size:15.5px}}
 
-/* MarketFluent course map */
-.mf-mod{padding:14px 16px;margin-bottom:14px}
-.mf-mod-h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:10px}
-.mf-mod-h b{font-size:1.05rem}
-.mf-mod-locked{opacity:.72;background:var(--card2)!important}
-.mf-ls{list-style:none;padding:0;margin:0}
-.mf-concept{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--card)}
-.mf-concept.locked,.mf-concept.locked .mf-act{opacity:.7}
-.mf-concept.done{border-color:var(--acc);background:var(--accs)}
-.mf-concept a,.mf-concept-main{font-weight:600;color:inherit;text-decoration:none}
-.mf-act{font-size:13px;color:var(--txt2);padding-left:2px}
-.mf-exam{margin-top:12px;padding:12px;border-radius:12px;border:1px dashed var(--line);background:var(--card2)}
-.mf-exam.ready{border-style:solid;border-color:var(--acc);background:var(--accs)}
-.mf-exam.done{border-color:var(--acc)}
-.mf-exam a{font-weight:650;color:inherit;text-decoration:none}
+/* MarketFluent course map — learner home, 8px scale, AA contrast */
+#topbar a.topbrand{display:flex;align-items:center;gap:10px;min-width:0;flex:1;color:inherit;text-decoration:none}
+#topbar a.topbrand b{flex:1;overflow:hidden;text-overflow:ellipsis}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt2)}
+.mf-map{--mf-mod:#1D4ED8;--mf-mod-2:#1E3A8A;--mf-lv:#0F766E;--mf-lv-bg:#F0FDFA;--mf-ink:#0F1530;--mf-ok:#067647;--mf-ok-bg:#ECFDF3;--mf-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.08);--mf-s:8px;padding-bottom:24px}
+html[data-theme=dark] .mf-map{--mf-mod:#1D4ED8;--mf-mod-2:#1E3A8A;--mf-lv:#5EEAD4;--mf-lv-bg:#134E4A;--mf-ink:var(--h,#F9FAFB);--mf-ok:#32D583;--mf-ok-bg:#052E1C;--mf-shadow:0 1px 2px rgba(0,0,0,.28),0 10px 28px rgba(0,0,0,.32)}
+.mf-map-hdr{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.mf-map-hdr h1{margin:0;letter-spacing:-.02em}
+.mf-welcome-link{display:inline-flex;align-items:center;margin-top:6px;font-size:13.5px;font-weight:600;color:var(--acc2);text-decoration:none;min-height:44px}
+.mf-stats{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mf-stats .pill,.mf-stats .btn{min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;text-decoration:none}
+.mf-map-lead{margin:0 0 16px;line-height:1.5}
+
+/* Coach card + speech bubble */
+.mf-coach{display:flex;gap:16px;align-items:flex-start;padding:16px;margin:0 0 16px;box-shadow:var(--mf-shadow);border-radius:20px}
+.mf-wick{width:88px;height:auto;max-height:150px;object-fit:contain;flex:none;filter:drop-shadow(0 8px 16px rgba(29,78,216,.18))}
+.mf-coach-copy{flex:1;min-width:0}
+.mf-coach-copy>b{display:block;font-size:12.5px;font-weight:650;color:var(--acc2);margin-bottom:8px}
+.mf-bubble{position:relative;background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 12px}
+.mf-bubble:before{content:"";position:absolute;left:-7px;top:16px;width:12px;height:12px;background:var(--card2);border-left:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg);border-radius:2px}
+.mf-bubble p{margin:0;font-size:16px;line-height:1.4;font-weight:650;color:var(--mf-ink)}
+.mf-coach .ph-next{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;border-radius:12px;font-weight:650}
+.mf-coach-note{margin:8px 0 0}
+
+/* Module cards */
+.mf-mod{padding:0 0 16px;margin:0 0 16px;overflow:hidden;border-radius:20px;box-shadow:var(--mf-shadow);border:1px solid var(--line)}
+.mf-mod-h{display:flex;align-items:center;gap:12px;padding:16px;margin:0;background:linear-gradient(135deg,var(--mf-mod) 0%,var(--mf-mod-2) 100%);color:#fff;min-height:72px}
+.mf-mod-num{flex:none;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-weight:800;font-size:18px;display:grid;place-items:center;letter-spacing:-.02em}
+.mf-mod-t{flex:1;min-width:0}
+.mf-mod-t b{display:block;color:#fff;font-size:1.12rem;line-height:1.25;letter-spacing:-.015em}
+.mf-mod-sub{display:block;margin-top:4px;color:#DBEAFE;font-size:13px;line-height:1.35;font-weight:500}
+.mf-ring{flex:none}
+.mf-mod-locked{box-shadow:none}
+.mf-mod-locked .mf-mod-h{background:linear-gradient(135deg,#4B5563 0%,#374151 100%)}
+.mf-mod-locked .mf-mod-sub{color:#E5E7EB}
+.mf-mod-cur{box-shadow:var(--mf-shadow),0 0 0 2px rgba(29,78,216,.28)}
+
+/* Level headers — teal, distinct from module blue */
+.mf-lv{padding:0 16px}
+.mf-lv-h{display:flex;align-items:center;gap:8px;margin:16px 0 8px;min-height:44px;color:var(--mf-lv);font-size:15px;font-weight:700;letter-spacing:-.01em}
+.mf-lv-ic{width:28px;height:28px;border-radius:8px;background:var(--mf-lv-bg);color:var(--mf-lv);display:grid;place-items:center;flex:none}
+.mf-lv-ic svg{stroke:currentColor}
+.mf-lv.locked .mf-lv-h{color:#4B5563}
+html[data-theme=dark] .mf-lv.locked .mf-lv-h{color:#9CA3AF}
+.mf-lv.locked .mf-lv-ic{background:var(--card2);color:currentColor}
+
+/* Concept path + rows */
+.mf-ls{list-style:none;margin:0;padding:0 0 4px;position:relative}
+.mf-ls:before{content:"";position:absolute;left:21px;top:8px;bottom:8px;width:3px;background:var(--line);border-radius:2px}
+.mf-concept{position:relative;display:grid;grid-template-columns:28px 1fr;gap:8px 12px;align-items:start;padding:12px 12px 12px 8px;margin:8px 0;min-height:44px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(15,23,42,.04);transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease}
+.mf-state{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;z-index:1;background:var(--card2);color:var(--mf-mod);border:2px solid var(--line);margin-top:2px}
+.mf-concept-body{min-width:0;display:flex;flex-direction:column;gap:4px}
+.mf-concept a,.mf-concept-main{font-weight:650;color:var(--mf-ink);text-decoration:none;line-height:1.35;padding:2px 0}
+.mf-concept a:hover{text-decoration:underline}
+.mf-act{font-size:13px;color:var(--txt2);padding:0}
+.mf-concept.done{border-color:#A6F4C5;background:var(--mf-ok-bg)}
+.mf-concept.done .mf-state{background:var(--mf-ok-bg);border-color:var(--mf-ok);color:var(--mf-ok)}
+.mf-concept.done .mf-state{animation:mf-pop .45s ease}
+@keyframes mf-pop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.mf-concept.mf-cur{border-color:var(--mf-mod);box-shadow:0 0 0 3px rgba(29,78,216,.22),var(--mf-shadow)}
+.mf-concept.mf-cur .mf-state{background:var(--mf-mod);border-color:var(--mf-mod);color:#fff}
+.mf-concept.mf-cur .mf-state svg{stroke:#fff}
+.mf-cur-go{margin-top:8px;min-height:44px;align-self:start;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.mf-concept.locked{background:var(--card2);box-shadow:none}
+.mf-concept.locked .mf-state{color:#4B5563;background:var(--card2)}
+.mf-concept.locked a,.mf-concept.locked .mf-concept-main,.mf-concept.locked .mf-act{color:#4B5563}
+html[data-theme=dark] .mf-concept.locked a,html[data-theme=dark] .mf-concept.locked .mf-concept-main,html[data-theme=dark] .mf-concept.locked .mf-act,html[data-theme=dark] .mf-concept.locked .mf-state{color:#9CA3AF}
+.mf-lock-lab{font-weight:600}
+
+/* Graduation Exam card — trophy/shield, always distinct from concept rows */
+.mf-map .mf-exam{display:block;margin:16px 16px 0;padding:0;border-radius:16px;border:1px solid #E8D5A3;background:linear-gradient(180deg,var(--card),#FBF6EA);overflow:hidden;box-shadow:var(--mf-shadow)}
+.mf-map .mf-exam .mf-exam-inner{display:flex;flex-direction:row;align-items:center;gap:12px;min-height:56px;padding:12px 14px;text-decoration:none;color:inherit;width:100%;box-sizing:border-box}
+.mf-exam-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:#F5E6C8;color:#92400E}
+.mf-exam-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mf-exam-t b{font-weight:700;color:#6B5420;line-height:1.3}
+.mf-exam.ready{border-color:#D97706;background:linear-gradient(180deg,var(--card),#FEF3C7)}
+.mf-exam.ready .mf-exam-ic{background:#F59E0B;color:#fff}
+.mf-exam.ready .mf-exam-t b{color:var(--mf-ink)}
+.mf-exam.done{border-color:#A6F4C5;background:var(--mf-ok-bg)}
+.mf-exam.done .mf-exam-ic{background:var(--mf-ok-bg);color:var(--mf-ok)}
+.mf-exam.done .mf-exam-t b{color:var(--mf-ink)}
+.mf-exam.locked .mf-exam-t .small{color:#78716C}
+html[data-theme=dark] .mf-map .mf-exam{border-color:#6B5420;background:linear-gradient(180deg,var(--card),#3B2A08)}
+html[data-theme=dark] .mf-exam-ic{background:#3B2A08;color:#FBBF24}
+html[data-theme=dark] .mf-exam-t b{color:#FDE68A}
+html[data-theme=dark] .mf-exam.locked .mf-exam-t .small{color:#D6C38A}
+html[data-theme=dark] .mf-exam.ready{background:linear-gradient(180deg,var(--card),#3B2A08)}
+html[data-theme=dark] .mf-exam.ready .mf-exam-ic{background:#D97706;color:#fff}
+html[data-theme=dark] .mf-exam.ready .mf-exam-t b,html[data-theme=dark] .mf-exam.done .mf-exam-t b{color:var(--h)}
+
+.mf-more{margin:0 0 16px;padding:16px;border-radius:16px;box-shadow:var(--mf-shadow)}
+.mf-map .card,.mf-map .pill,.mf-map .btn{transition:box-shadow .2s ease,transform .2s ease,background-color .2s ease}
+@media (prefers-reduced-motion:reduce){
+  .mf-concept.done .mf-state{animation:none}
+  .mf-map .card,.mf-map .pill,.mf-map .btn,.mf-concept{transition:none}
+}
+@media (max-width:400px){
+  .mf-wick{width:72px}
+  .mf-bubble p{font-size:15px}
+  .mf-mod-t b{font-size:1.02rem}
+}
+
+/* Override game.css .phase .ph-ls li>span:first-child {display:block;width:auto} */
+.mf-map .phase .ph-ls li.mf-concept{display:grid}
+.mf-map .phase .ph-ls li.mf-concept>.mf-state{display:grid;place-items:center;width:28px;height:28px;max-width:28px;min-width:28px;min-height:28px;padding:0;margin:2px 0 0;box-sizing:border-box;flex:none;border-radius:50%}
+.mf-ring text{fill:#fff}
 /* ===== Game-style lesson player (pilot): Bright Path v3 colors, more playful ===== */
 .g-wrap{max-width:820px;margin:0 auto;--gup:var(--upc);--gdn:var(--dnc)}
 .g-meta{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
@@ -2436,7 +2527,7 @@ ROUTES.learn=(m)=>{m.innerHTML=`${pathBar()}<h1>📚 Curriculum</h1><p class="mu
 ROUTES.chapter=(m,id)=>{const c=chById(id);if(!c)return ROUTES.learn(m);m.innerHTML=`${pathBar(c)}<h1>${esc(c.title)}</h1><p class="mut">${esc(c.blurb)}</p>
  ${c.lessons.map((l,i)=>{const d=P.lessons[l.id]&&P.lessons[l.id].done;return `<a class="card lvl ${d?'done':''}" style="text-decoration:none;color:inherit" href="#/lesson/${l.id}"><div class="num">${d?'✓':i+1}</div><div><b>${esc(l.t)}</b><div class="small mut">~${l.min} min</div></div></a>`}).join('')}
  <a class="card lvl ${mPassed(c.id)?'done':''}" style="text-decoration:none;color:inherit" href="#/mastery/${c.id}"><div class="num">${mPassed(c.id)?'✓':'★'}</div><div><b>${c.capstone?'Capstone exam':c.review?'Cumulative review':'Mastery check'}</b><div class="small mut">${c.capstone?'Mixed exam with chart recognition. Pass at 80%.':'Quiz + chart recognition + teach-back'}</div></div></a>`};
-ROUTES.lesson=(m,id)=>{const l=lessonById(id);if(!l)return ROUTES.learn(m);const c=chById(l.ch);if(!unlocked(c.id)){m.innerHTML='<div class="card">🔒 This chapter is locked. <a href="#/learn">Back to curriculum</a></div>';return}
+ROUTES.lesson=(m,id)=>{const l=lessonById(id);if(!l)return ROUTES.learn(m);const c=chById(l.ch);if(!unlocked(c.id)){m.innerHTML='<div class="card">🔒 This chapter is locked. <a href="#/phases">Back to the course map</a></div>';return}
  const st=P.lessons[l.id]||{};const idx=c.lessons.indexOf(l);const nxt=c.lessons[idx+1];
  m.innerHTML=`${pathBar(c)}<div class="lesson"><div class="small mut">${esc(c.title)} · Lesson ${idx+1} of ${c.lessons.length} · ~${l.min} min · no timer, go at your pace</div><h1>${esc(l.t)}</h1>
  <div class="callout" style="border-color:#64748b"><b>🔁 Recall from last time:</b> ${l.recall}</div>
@@ -2463,7 +2554,7 @@ function quizBlock(host,qs,onDone){let ans={};qs=qs.map(q=>{const idx=shuffle(q.
 /* ---------- mastery ---------- */
 function reviewPool(c){let pool=[];(c.from||[]).forEach(id=>pool=pool.concat(chById(id).quiz));return shuffle(pool).slice(0,10)}
 function capstoneQs(){let pool=[];CH.forEach(c=>pool=pool.concat(c.quiz));pool=shuffle(pool).slice(0,22);const r=rng(Date.now()%1e6);const types=['bull_flag','double_bottom','hs','asc_tri','bos_bull','choch_bear','ssl_sweep','orb','ctrl','bias','fakeout','cup_handle','exec','liq'];const ch=shuffle(types,r).slice(0,8).map(t=>chartQ(t,3,r));return shuffle(pool.concat(ch),r)}
-ROUTES.mastery=(m,id)=>{const c=chById(id);if(!c)return ROUTES.learn(m);if(!unlocked(c.id)){m.innerHTML='<div class="card">🔒 Locked. <a href="#/learn">Back</a></div>';return}
+ROUTES.mastery=(m,id)=>{const c=chById(id);if(!c)return ROUTES.learn(m);if(!unlocked(c.id)){m.innerHTML='<div class="card">🔒 Locked. <a href="#/phases">Course map</a></div>';return}
  const ms=P.mastery[c.id]||{};const r=rng(Date.now()%1e6);
  const qs=c.capstone?capstoneQs():c.review?reviewPool(c):c.quiz;const cq=c.capstone?[]:(c.chart||[]).length?shuffle(c.chart,r).slice(0,3).map(t=>chartQ(t,c.review?2:1,r)):[];
  const passQ=c.capstone?0.8:0.7;
@@ -3016,7 +3107,7 @@ function buildExam(c,seed){const r=rng(seed);const used=new Set();const n=c.n||1
  return shuffle(out,r)}
 function examLabel(c){return EXAM_LABEL[c.exam]||'Exam'}
 function reviewLinks(t){const c=chById(t);return c.lessons.map(l=>`<a href="#/lesson/${l.id}">${esc(l.t)}</a>`).join(' · ')}
-ROUTES.mastery=(m,id)=>{const c=chById(id);if(!c)return ROUTES.learn(m);if(!unlocked(c.id)){m.innerHTML='<div class="card">🔒 Locked. Pass the previous exam first. <a href="#/learn">Back</a></div>';return}
+ROUTES.mastery=(m,id)=>{const c=chById(id);if(!c)return ROUTES.learn(m);if(!unlocked(c.id)){m.innerHTML='<div class="card">🔒 Locked. Pass the previous exam first. <a href="#/phases">Course map</a></div>';return}
  const seed=Math.floor(Math.random()*1e9)+1;const qs=buildExam(c,seed);const pass=c.pass||0.7;const ex=(P.exams=P.exams||{})[c.id]||{};
  const fmts=[...new Set(qs.map(q=>q.fmt))];
  m.innerHTML=`${pathBar(c)}<div class="small mut">${examLabel(c)}${ex.attempts?` · attempt ${ex.attempts+1} · best so far ${Math.round(ex.best*100)}% (${letter(ex.best)[1]})`:''}</div><h1>${c.exam==='final'?'🎓':c.exam==='midterm'?'📝':c.exam==='unit'?'🧪':'★'} ${esc(c.exam==='chapter'?'Chapter Review: '+c.title:c.title)}</h1>
@@ -3052,7 +3143,7 @@ ROUTES.gradebook=(m)=>{const pr=profiles().find(p=>p.id===Store.pid)||{name:''};
  <div class="grid g4" style="margin:10px 0"><div class="stat"><b>${rows.filter(c=>mPassed(c.id)).length}/${rows.length}</b><span>Exams passed</span></div><div class="stat"><b>${Object.values(E).reduce((a,e)=>a+(e.attempts||0),0)}</b><span>Attempts</span></div><div class="stat"><b>${qc.length?Math.round(qc.reduce((a,x)=>a+x.qc,0)/qc.length*100)+'%':'—'}</b><span>Lesson quick-check avg</span></div><div class="stat"><b>${P.capstone&&P.capstone.passed?'🎓 Graduated':'In progress'}</b><span>Status</span></div></div>
  <div style="overflow-x:auto"><table><tr><th>Type</th><th>Course</th><th>Weight</th><th>Attempts</th><th>Best</th><th>Grade</th><th>Points</th><th>Status</th></tr>${tr}</table></div>
  <p class="small mut">Grade scale: A ≥93 · A− 90 · B+ 87 · B 83 · B− 80 · C+ 77 · C 73 · C− 70 · D 60 · F below 60. GPA weights: Chapter Review ×1, Unit Exam ×2, Midterm ×3, Final ×4 (best attempt counts). Pass marks: chapter and unit 70%, midterm 75%, final 80%.</p></div>
- <div class="row noprint"><button class="btn p" onclick="window.print()">🖨 Print transcript</button><a class="btn" href="#/learn">Curriculum</a></div>`};
+ <div class="row noprint"><button class="btn p" onclick="window.print()">🖨 Print transcript</button><a class="btn" href="#/phases">Course map</a></div>`};
 /* ===== Review Gate: Alpaca paper trades ===== */
 function parseCSV(t){const rows=[];let row=[],f='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}else if(ch==='"')q=true;else if(ch===','){row.push(f);f=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(f);f='';if(row.some(x=>x.trim()))rows.push(row);row=[]}else f+=ch}row.push(f);if(row.some(x=>x.trim()))rows.push(row);return rows}
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/[$,\s]/g,''));return isFinite(x)?x:null};
@@ -4332,7 +4423,7 @@ ROUTES.profiles=(m)=>{const ps=profiles();
  <h2>What is a Student Trader?</h2><p>Your Student Trader is you inside the Academy: a trader name or nickname, an avatar, and a goal like “Day trader in training”. Each family member creates their own, so progress, flashcards, journal and sim trades stay separate.</p>
  <h2>How your progress is saved</h2>${SAVED_HOW}${LEAVE_HTML}${PRIVACY}
  <details class="card"><summary><b>Advanced: import a backup file (.json)</b></summary><p class="small mut">Exported from another device? Choose the file to add that Student Trader here.</p><input type="file" id="pimp" accept=".json,application/json"></details>`;
- $$('[data-use]').forEach(b=>b.onclick=()=>{loadProfile(b.dataset.use);shell();location.hash=P.last&&P.last!=='#/profiles'?P.last:'#/dash';route()});
+ $$('[data-use]').forEach(b=>b.onclick=()=>{loadProfile(b.dataset.use);shell();location.hash=(typeof mfMapHash==='function'?mfMapHash(P.last&&P.last!=='#/profiles'?P.last:''):'')||'#/phases';route()});
  $$('[data-del]').forEach(b=>b.onclick=()=>{const id=b.dataset.del;const on=smeta(id)&&smeta(id).code;if(!confirm(`Remove this Student Trader from this device?${on?' Their cloud save stays online, so you can restore it later with the save code.':' This deletes all their progress on this device.'}`))return;Store.wipe(id);Store.gset('profiles',profiles().filter(p=>p.id!==id));setMeta(id,null);if(Store.pid===id){P=null;Store.pid=null;Store.gset('active',null)}route()});
  $('#pimp').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.profile||!o.data)throw 0;const id='p'+Date.now().toString(36);Store.load(id,o.data);const ps=profiles();ps.push({...o.profile,id});Store.gset('profiles',ps);toast('Imported '+esc(o.profile.name));route()}catch(x){toast('That file isn’t a valid Student Trader backup')}};r.readAsText(f)}};
 ROUTES.create=(m)=>{const st={emoji:EMOJIS[0],color:COLORS[0]};const MOT=['Day trader in training','Swing trader in the making','Patience pays','Protect my capital first','Learning one candle at a time'];
@@ -4355,7 +4446,7 @@ ROUTES.restore=(m)=>{m.innerHTML=`<h1>🔑 I have a save code</h1><p class="mut"
   msg.innerHTML='<p class="mut">⏳ Looking up your save…</p>';try{const d=await cloudGet(code);if(!d){msg.innerHTML='<div class="callout w">No save found for <b>'+esc(code)+'</b>. Check each character and try again.</div>';return}
    const o=JSON.parse(d.data);const all=Store.gget('sync',{});let pid=Object.keys(all).find(k=>all[k].code===code&&profiles().some(p=>p.id===k));
    if(pid){const lm=smeta(pid);if(lm.dirty&&(lm.localTs||0)>d.updatedAt&&!confirm('This device has newer unsynced changes for this Student Trader. Replace them with the cloud copy?'))return}else pid='p'+Date.now().toString(36);
-   applyCloud(pid,o,d.updatedAt);setMeta(pid,{code,on:true,rid:o.rid&&RID_RE.test(o.rid)?o.rid:((smeta(pid)||{}).rid||rnd(20,'abcdefghijklmnopqrstuvwxyz0123456789')),lastActive:Date.now()});loadProfile(pid);shell();toast('🎉 Welcome back, '+esc((o.profile||{}).name||'trader')+'!');location.hash=P.last&&P.last!=='#/profiles'?P.last:'#/dash';route()}
+   applyCloud(pid,o,d.updatedAt);setMeta(pid,{code,on:true,rid:o.rid&&RID_RE.test(o.rid)?o.rid:((smeta(pid)||{}).rid||rnd(20,'abcdefghijklmnopqrstuvwxyz0123456789')),lastActive:Date.now()});loadProfile(pid);shell();toast('🎉 Welcome back, '+esc((o.profile||{}).name||'trader')+'!');location.hash=(typeof mfMapHash==='function'?mfMapHash(P.last&&P.last!=='#/profiles'?P.last:''):'')||'#/phases';route()}
   catch(e){msg.innerHTML='<div class="callout w">Couldn’t reach the cloud ('+esc(navigator.onLine?e.message:'you seem to be offline')+'). Please try again.</div>'}};
  $('#rgo').onclick=go;$('#rc').onkeydown=e=>{if(e.key==='Enter')go()}};
 ROUTES.cloud=(m,arg)=>{const pid=Store.pid;const mt=smeta(pid)||{};const p=profiles().find(x=>x.id===pid)||{};
@@ -4920,22 +5011,26 @@ const ICP={learn:'M2 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H2zM22 5h-6a4 4 0 0 0-4 4
 const icn=(n,s=18,c='currentColor',w=1.75)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICP[n]||ICP.spark}"/></svg>`;
 const ringSvg=(p,s=64,w=6)=>{const r=(s-w)/2,c=2*Math.PI*r;return `<svg width="${s}" height="${s}" style="flex:none" aria-label="${Math.round(p*100)}% complete" data-keep><circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" style="stroke:var(--line2)" stroke-width="${w}"/>${p>0?`<circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" style="stroke:var(--acc)" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c*p} ${c}" transform="rotate(-90 ${s/2} ${s/2})"/>`:''}<text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="${s*.24}" font-weight="650" style="fill:var(--txt)" font-family="Inter,Segoe UI">${Math.round(p*100)}%</text></svg>`};
 const LOGO=`<span class="mk" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 3v4M12 17v4"/><rect x="8.5" y="7" width="7" height="10" rx="1.5" fill="#fff"/></svg></span>`;
-const TABS=[['learn','Learn','#/learn'],['practice','Practice','#/practice'],['exams','Exams','#/exams'],['profile','Profile','#/profile']];
+const TABS=[['learn','Learn','#/phases'],['practice','Practice','#/practice'],['exams','Exams','#/exams'],['profile','Profile','#/profile']];
+/* Learner home is the Modules course map. Stale #/learn, #/dash and bare root go there; the old unit accordion stays at #/learn/units for the harness. */
+function mfMapHash(h){const raw=String(h||'');const parts=raw.replace(/^#\/?/,'').split('/');const n=parts[0]||'';if(n==='learn'&&parts[1]==='units')return raw;if(!n||n==='learn'||n==='dash'||n==='start')return '#/phases';return raw.startsWith('#')?raw:'#/'+raw}
+function mfGoMap(){return '#/phases'}
 const PRACTICE_R=['practice','drills','scen','markup','sim','pc','builder','games','tools','gloss','checklist'];
 const PROFILE_R=['profile','profiles','journal','plan','progress','setup','cloud','create','host','restore','saving','timezone','help'];
-function tabOf(h){const[_,n,a]=(h||'#/learn').split('/');if(n==='arena'||n==='phases'||n==='level'||n==='p'||n==='deeper')return 'learn';if(PRACTICE_R.includes(n))return 'practice';if(['exams','gradebook','gate','cert'].includes(n))return 'exams';if(n==='mastery'){const c=chById(a);return c&&c.exam&&c.exam!=='chapter'?'exams':'learn'}if(PROFILE_R.includes(n))return 'profile';return 'learn'}
+function tabOf(h){const[_,n,a]=(h||'#/phases').split('/');if(n==='arena'||n==='phases'||n==='level'||n==='p'||n==='deeper')return 'learn';if(PRACTICE_R.includes(n))return 'practice';if(['exams','gradebook','gate','cert'].includes(n))return 'exams';if(n==='mastery'){const c=chById(a);return c&&c.exam&&c.exam!=='chapter'?'exams':'learn'}if(PROFILE_R.includes(n))return 'profile';return 'learn'}
 function isHost(){try{const e=HOST&&HOST.user&&HOST.user.email;if(e&&e.toLowerCase()===String(cloudCfg().host||CLOUD_CFG.host).toLowerCase())return true}catch(e){}return Store.gget('hostdev',0)===1}
 if(typeof HOST==='object'){HOST.useUser=(o=>async function(u){const r=await o.call(HOST,u);try{const h=String((cloudCfg().host||CLOUD_CFG.host)).toLowerCase();if(r&&r.email&&r.email.toLowerCase()===h)Store.gset('hostdev',1)}catch(e){}return r})(HOST.useUser)}
 const themeLbl=()=>THEME.cur==='dark'?`${icn('sun',15)} Light mode`:`${icn('moon',15)} Dark mode`;
 applyTheme=(o=>function(t,s){o(t,s);$$('.themebtn').forEach(b=>b.innerHTML=themeLbl())})(applyTheme);
 const EMO2=/^(\s*)(?:[\u{1F000}-\u{1FAFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2460}-\u{27BF}\u{2900}-\u{297F}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}](?:\uFE0F|\u200D[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]\uFE0F?)*\s*)+/u;
 function deEmoji(root){if(!root)return;const sel='h1,h2,h3,h4,b,strong,.btn,.sect,.chbanner b,.callout>b:first-child,.nav a,.pill,.tab,label,summary,th,.cloudst,.badge';root.querySelectorAll(sel).forEach(el=>{if(el.closest('[data-keep-emoji],.cert,.q .opt,textarea'))return;const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let t,first=true;while((t=w.nextNode())){if(!t.nodeValue.trim())continue;if(first){const nv=t.nodeValue.replace(EMO2,'$1');if(nv!==t.nodeValue)t.nodeValue=nv}break}})}
-shell=function(){document.body.innerHTML=`<div id="topbar">${LOGO}<b>MarketFluent Academy</b><button class="btn sm themebtn" onclick="toggleTheme()" aria-label="Toggle dark mode">${themeLbl()}</button></div><div id="app"><nav id="side" aria-label="Main navigation"></nav><main id="main"></main></div><nav id="tabbar" aria-label="Main"></nav>`};
+shell=function(){document.body.innerHTML=`<div id="topbar"><a class="brand topbrand" href="#/phases">${LOGO}<b>MarketFluent Academy</b></a><button class="btn sm themebtn" onclick="toggleTheme()" aria-label="Toggle dark mode">${themeLbl()}</button></div><div id="app"><nav id="side" aria-label="Main navigation"></nav><main id="main"></main></div><nav id="tabbar" aria-label="Main"></nav>`};
 showProfiles=(o=>function(){o();if(!P){const sd=$('#side');if(sd)sd.innerHTML=`<a class="brand" href="#/profiles">${LOGO}<span>MarketFluent Academy</span></a>`;const tb=$('#tabbar');if(tb)tb.innerHTML='';const m=$('#main');if(m)deEmoji(m)}})(showProfiles);
-renderSide=function(){const s=$('#side');if(!s||!P)return;const h=location.hash||'#/learn';const t=tabOf(h);const pr=profiles().find(p=>p.id===Store.pid)||{name:'?',color:'#4F46E5'};const r=rank();let due=0;try{due=dueCards().length}catch(e){}const ns=nextStep();
+renderSide=function(){const s=$('#side');if(!s||!P)return;const h=location.hash||'#/phases';const t=tabOf(h);const pr=profiles().find(p=>p.id===Store.pid)||{name:'?',color:'#4F46E5'};const r=rank();let due=0;try{due=dueCards().length}catch(e){}
+ const nx=(typeof pNext==='function')?pNext():null;const cont=nx&&typeof pHref==='function'?pHref(nx):(typeof nextStep==='function'&&nextStep().href)||'#/phases';
  const tabs=TABS.map(([k,l,href])=>`<a href="${href}" class="${t===k?'on':''}" ${t===k?'aria-current="page"':''}>${icn(k,20)}<span>${l}</span>${k==='learn'&&due?`<span class="cnt" title="flashcards due">${due}</span>`:''}</a>`).join('');
- s.innerHTML=`<a class="brand" href="#/learn">${LOGO}<span>MarketFluent Academy</span></a><div class="nav">${tabs}</div>
- <div class="side-cta"><a class="btn p" href="${ns.href}">${icn('play',14)} Continue</a></div>
+ s.innerHTML=`<a class="brand" href="#/phases">${LOGO}<span>MarketFluent Academy</span></a><div class="nav">${tabs}</div>
+ <div class="side-cta"><a class="btn p" href="${cont}">${icn('play',14)} Continue</a></div>
  <div class="side-mini">${typeof cloudPill==='function'?cloudPill():''}</div>
  <a class="me" href="#/profile"><span class="av" style="background:${pr.color}" data-keep>${esc((pr.name||'?').trim().charAt(0).toUpperCase())}</span><span class="t"><b>${esc(pr.name)}</b><span>${esc(r.name)} · ${P.xp} XP</span></span>${icn('chev',16)}</a>`;
  const tb=$('#tabbar');if(tb)tb.innerHTML=TABS.map(([k,l,href])=>`<a href="${href}" class="${t===k?'on':''}" ${t===k?'aria-current="page"':''}>${icn(k,22)}<span>${l}</span></a>`).join('');
@@ -4951,9 +5046,9 @@ function bestOf(c){const e=(P.exams||{})[c.id];return e&&e.attempts?e.best:null}
 function examRowLabel(c){return c.exam==='chapter'?'Chapter '+c.num+' Review':c.exam==='midterm'?'Midterm':c.exam==='final'?'Final Exam':'Unit exam'}
 function redirect(m,to){history.replaceState(null,'',to);route()}
 /* ---------- LEARN: home timeline ---------- */
-ROUTES.dash=(m)=>redirect(m,'#/learn');ROUTES.start=(m)=>redirect(m,'#/arena');
+ROUTES.dash=(m)=>redirect(m,'#/phases');ROUTES.start=(m)=>redirect(m,'#/arena');
 ROUTES.checklist=(m)=>redirect(m,'#/practice/toolbox');
-ROUTES.learn=(m)=>{const pr=profiles().find(p=>p.id===Store.pid)||{name:''};const ns=nextStep();const cur=currentCh();const cu=unitOf(cur.id)||UNITS[0];let due=0;try{due=dueCards().length}catch(e){}
+function legacyLearnHome(m){const pr=profiles().find(p=>p.id===Store.pid)||{name:''};const ns=nextStep();const cur=currentCh();const cu=unitOf(cur.id)||UNITS[0];let due=0;try{due=dueCards().length}catch(e){}
  const hr=new Date().getHours();const greet=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';const ov=overall();const st=studyStreak();
  const nl=ns.href.startsWith('#/lesson/')?lessonById(ns.href.split('/')[2]):null;const nc=nl?chById(nl.ch):null;
  const unitHTML=UNITS.map(u=>{const cs=u.ch.map(chById).filter(Boolean);const dn=cs.every(c=>mPassed(c.id));const now=!dn&&u.ch.includes(cur.id);const lsn=cs.reduce((a,c)=>a+c.lessons.length,0);const ld=cs.reduce((a,c)=>a+c.lessons.filter(l=>done(l.id)).length,0);
@@ -4972,6 +5067,7 @@ ROUTES.learn=(m)=>{const pr=profiles().find(p=>p.id===Store.pid)||{name:''};cons
  <div class="card fade d3" style="margin-top:16px"><div class="eyebrow" style="margin-bottom:6px">Your numbers</div><div class="kv"><span class="mut">Lessons done</span><b>${LESSONS.filter(l=>done(l.id)).length} / ${LESSONS.length}</b></div><div class="kv"><span class="mut">Exams passed</span><b>${CH.filter(c=>c.exam&&mPassed(c.id)).length} / ${CH.filter(c=>c.exam).length}</b></div><div class="kv"><span class="mut">Drill accuracy</span><b>${P.drills&&P.drills.n?Math.round(P.drills.ok/P.drills.n*100)+'%':'—'}</b></div><div class="kv"><span class="mut">Time zone</span><a href="#/timezone">${typeof zoneAbbr==='function'?zoneAbbr(zoneOf()):'ET'}</a></div></div>
  <div class="card fade d4" style="margin-top:16px"><div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="eyebrow">Medals</div><a class="small" href="#/profile">All</a></div><div class="medals">${earned.length?earned.map(b=>medal(b,true)).join(''):'<p class="small mut" style="margin:0">Finish a chapter review to earn your first medal.</p>'}</div></div></div></div>`;
  $$('.uhead',m).forEach(h=>{const t=()=>{const u=h.closest('.unit');u.classList.toggle('open');h.setAttribute('aria-expanded',u.classList.contains('open'))};h.onclick=t;h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}})};
+ROUTES.learn=(m,arg)=>{if(arg==='units'){legacyLearnHome(m);return}redirect(m,'#/phases')};
 function medal(b,on){const[id,,name]=b;const col=on?'var(--goldc)':'var(--mut2)';return `<div class="medal ${on?'':'off'}" title="${esc(name)}"><svg width="54" height="62" viewBox="0 0 54 62" data-keep aria-hidden="true"><path d="M17 2h8l4 16h-8zM37 2h-8l-4 16h8z" style="fill:${on?'var(--acc)':'var(--line)'}"/><circle cx="27" cy="38" r="20" style="fill:${on?'#FEF7E0':'var(--line2)'};stroke:${col}" stroke-width="3"/><path transform="translate(15 26)" d="${ICP.star}" fill="none" style="stroke:${col}" stroke-width="1.8" stroke-linejoin="round"/></svg><div>${esc(name)}</div></div>`}
 /* ---------- PRACTICE hub ---------- */
 const PRACTICE_TILES=[['pc','candle','Practice Charts','Guided hunts on real-looking charts.'],['sim','sim','Simulator','Replay a day bar by bar, plan and take trades.'],['drills','target','Chart drills','Who’s in control, Read & Decide, Narrate.'],['markup','pen','Drawing Lab','Draw levels, zones, structure; get graded.'],['builder','candle','Candle Builder','Build candles and see what they mean.'],['scen','scen','Scenarios & role-plays','Make the call in realistic situations.'],['games','game','Terminology games','Match, speed rounds and more.']];
@@ -5007,7 +5103,9 @@ ROUTES.mastery=(o=>function(m,arg){if(arg==='grad'){history.replaceState(null,''
 ROUTES.chapter=(o=>function(m,arg){const c=chById(arg);if(c&&c.grad){history.replaceState(null,'','#/lesson/c15l4');return ROUTES.lesson(m,'c15l4')}return o(m,arg)})(ROUTES.chapter);
 function wickify(m){let first=true;$$('p,div.small,li',m).forEach(el=>{if(el.closest('.wbubble,[data-keep],.opt,textarea,.q'))return;const t=el.textContent.trim();if(!/^Coach Wick:\s*/.test(t))return;let h=el.innerHTML.replace(/^\s*(?:<b>)?Coach Wick:?(?:<\/b>)?:?\s*/,'').replace(/^[“"]/,'').replace(/[”"]\s*$/,'');const pose=/passed|nice|great|proud|earned|well done|proof you can|🎉/i.test(t)?'cheer':'coach';const d=document.createElement('div');d.innerHTML=wickBubble(h,pose);const bb=d.firstElementChild;bb.style.margin='0';if(el.parentElement&&el.parentElement.classList.contains('card')&&el.parentElement.children.length<=3&&el===el.parentElement.firstElementChild){el.replaceWith(bb);el=null}else{el.replaceWith(bb)}first=false});const gen=$$('.wbubble',m);if(gen.length>1&&gen[0].dataset.gen)gen[0].remove()}
 /* ---------- post-render: banners, numbering, Wick placement, emoji-free chrome ---------- */
-route=(o=>function(){const h=location.hash||'#/learn';const[_,n,a]=h.split('/');o();const m=$('#main');if(!m||!P)return;
+route=(o=>function(){const want=typeof mfMapHash==='function'?mfMapHash(location.hash||''):(location.hash||'#/phases');if(want==='#/phases'&&!/^#\/phases/.test(location.hash||'')&&location.hash!=='#/learn/units'){try{history.replaceState(null,'',want)}catch(e){location.hash=want}}
+ window._mfFromHash=window._mfPrevHash||'';window._mfPrevHash=location.hash||'#/phases';
+ const h=location.hash||'#/phases';const[_,n,a]=h.split('/');o();const m=$('#main');if(!m||!P)return;
  const dk=ymd();if(!(P.days||[]).includes(dk)){P.days=(P.days||[]).concat(dk).slice(-400);Store.set('prog',P)}
  const c=typeof chOf==='function'?chOf(h):null;const bn=$('.chbanner',m);
  if(bn&&c){const u=unitOf(c.id);const dn=c.lessons.filter(l=>done(l.id)).length;bn.innerHTML=`<div class="ic">${icn(c.exam&&c.exam!=='chapter'?'exams':c.grad?'star':'book',22,'var(--acc)')}</div><div style="flex:1"><b>${esc(c.title)}</b><span>${u?`Unit ${u.n} · `:''}${chLabel(c)}${c.lessons.length?` · ${dn}/${c.lessons.length} lessons done`:''}${mPassed(c.id)?' · passed':''}</span></div>`}
@@ -5046,7 +5144,7 @@ ROUTES.profiles=(m)=>{const ps=profiles();
  <details class="card wel-more"><summary>How saving and privacy work</summary><div class="wel-more-b">${SAVED_HOW}${LEAVE_HTML}${PRIVACY}</div></details>
  <details class="card wel-more"><summary>Advanced: import a backup file (.json)</summary><div class="wel-more-b"><p class="small mut">Exported from another device? Choose the file to add that profile here.</p><input type="file" id="pimp" accept=".json,application/json"></div></details>
  </div>`;
- $$('[data-use]').forEach(b=>b.onclick=()=>{loadProfile(b.dataset.use);shell();location.hash=P.last&&P.last!=='#/profiles'?P.last:'#/dash';route()});
+ $$('[data-use]').forEach(b=>b.onclick=()=>{loadProfile(b.dataset.use);shell();location.hash=(typeof mfMapHash==='function'?mfMapHash(P.last&&P.last!=='#/profiles'?P.last:''):'')||'#/phases';route()});
  $$('[data-del]').forEach(b=>b.onclick=()=>{const id=b.dataset.del;const on=smeta(id)&&smeta(id).code;if(!confirm(`Remove this profile from this device?${on?' Their cloud save stays online, so you can restore it later with the save code.':' This deletes all their progress on this device.'}`))return;Store.wipe(id);Store.gset('profiles',profiles().filter(p=>p.id!==id));setMeta(id,null);if(Store.pid===id){P=null;Store.pid=null;Store.gset('active',null)}route()});
  $('#pimp').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.profile||!o.data)throw 0;const id='p'+Date.now().toString(36);Store.load(id,o.data);const ps=profiles();ps.push({...o.profile,id});Store.gset('profiles',ps);toast('Imported '+esc(o.profile.name));route()}catch(x){toast('That file isn’t a valid profile backup')}};r.readAsText(f)}};
 
@@ -5084,7 +5182,7 @@ ROUTES.restore=(m)=>{m.innerHTML=`<div class="wel wel-form">${back}
   msg.innerHTML='<p class="mut">Looking up your save…</p>';try{const d=await cloudGet(code);if(!d){msg.innerHTML='<div class="callout w">No save found for <b>'+esc(code)+'</b>. Check each character and try again.</div>';return}
    const o=JSON.parse(d.data);const all=Store.gget('sync',{});let pid=Object.keys(all).find(k=>all[k].code===code&&profiles().some(p=>p.id===k));
    if(pid){const lm=smeta(pid);if(lm.dirty&&(lm.localTs||0)>d.updatedAt&&!confirm('This device has newer unsynced changes for this profile. Replace them with the cloud copy?'))return}else pid='p'+Date.now().toString(36);
-   applyCloud(pid,o,d.updatedAt);setMeta(pid,{code,on:true,rid:o.rid&&RID_RE.test(o.rid)?o.rid:((smeta(pid)||{}).rid||rnd(20,'abcdefghijklmnopqrstuvwxyz0123456789')),lastActive:Date.now()});loadProfile(pid);shell();toast('Welcome back, '+esc((o.profile||{}).name||'trader')+'!');location.hash=P.last&&P.last!=='#/profiles'?P.last:'#/dash';route()}
+   applyCloud(pid,o,d.updatedAt);setMeta(pid,{code,on:true,rid:o.rid&&RID_RE.test(o.rid)?o.rid:((smeta(pid)||{}).rid||rnd(20,'abcdefghijklmnopqrstuvwxyz0123456789')),lastActive:Date.now()});loadProfile(pid);shell();toast('Welcome back, '+esc((o.profile||{}).name||'trader')+'!');location.hash=(typeof mfMapHash==='function'?mfMapHash(P.last&&P.last!=='#/profiles'?P.last:''):'')||'#/phases';route()}
   catch(e){msg.innerHTML='<div class="callout w">Couldn’t reach the cloud ('+esc(navigator.onLine?e.message:'you seem to be offline')+'). Please try again.</div>'}};
  $('#rgo').onclick=go;$('#rc').onkeydown=e=>{if(e.key==='Enter')go()}};
 })();
@@ -6828,7 +6926,7 @@ const GAMEP={
   const save=()=>{g.at=run.i;Store.set('prog',P)};
   const nChecks=S.filter(x=>x.t==='check'||x.t==='boss'||x.t==='act').length;
   const stars=()=>run.miss===0?3:run.miss<=2?2:1;
-  const head=()=>`<div class="g-top"><a class="g-x" href="${backH}" aria-label="Back to the ${X?'level':'chapter'}">✕</a><div class="g-prog"><div class="g-step">Step <b>${run.i+1}</b> of ${S.length}</div><div class="g-bar" role="progressbar" aria-valuemin="1" aria-valuemax="${S.length}" aria-valuenow="${run.i+1}"><i style="width:${(run.i+1)/S.length*100}%"></i>${S.map((x,k)=>`<span class="g-pip ${x.t} ${k<run.i?'done':''} ${k===run.i?'on':''}" style="left:${(k+.5)/S.length*100}%"></span>`).join('')}</div></div><div class="g-stars" aria-label="Stars this level">⭐ <b id="gstar">${run.got||0}</b></div><button class="g-snd" id="gsnd" aria-label="${GAMEP.snd()?'Sound on, tap to mute':'Sound off, tap to turn on'}">${GAMEP.snd()?'🔊':'🔇'}</button></div>`;
+  const head=()=>`<div class="g-top"><a class="g-x" href="${backH}" aria-label="Back to the map">✕</a><div class="g-prog"><div class="g-step">Step <b>${run.i+1}</b> of ${S.length}</div><div class="g-bar" role="progressbar" aria-valuemin="1" aria-valuemax="${S.length}" aria-valuenow="${run.i+1}"><i style="width:${(run.i+1)/S.length*100}%"></i>${S.map((x,k)=>`<span class="g-pip ${x.t} ${k<run.i?'done':''} ${k===run.i?'on':''}" style="left:${(k+.5)/S.length*100}%"></span>`).join('')}</div></div><div class="g-stars" aria-label="Stars this level">⭐ <b id="gstar">${run.got||0}</b></div><button class="g-snd" id="gsnd" aria-label="${GAMEP.snd()?'Sound on, tap to mute':'Sound off, tap to turn on'}">${GAMEP.snd()?'🔊':'🔇'}</button></div>`;
   const bubble=(t,pose)=>t?`<div class="g-wick ${pose==='cheer'?'cheer':''}"><img alt="Coach Wick" src="${pose==='cheer'?WICK_IMG.cheerF:WICK_IMG.coachF}" width="56" height="56"><div class="g-say"><b>Coach Wick</b><p>${t}</p></div></div>`:'';
   const moreBox=(x)=>{const h=GAMEP.more(l,x.more);return h?`<div class="g-more g-inline lesson" data-keep><div class="eyebrow">Learn</div><div class="g-more-b">${h}</div></div>`:''};
   const loadTikTok=()=>{const box=document.querySelector('.mf-vid');if(!box||!box.querySelector('.tiktok-embed'))return;
@@ -8018,7 +8116,8 @@ ROUTES.deeper=(m)=>{m.innerHTML=`<div class="hdr"><div><div class="eyebrow">Opti
  <p class="small"><a href="#/phases">← Back to the course map</a></p>`};
 ROUTES.account=(m)=>{m.innerHTML=`<div class="hdr"><div><h1>Practice account</h1></div></div>${acctPickerHTML()}<p class="small"><a href="#/profile">← Profile</a></p>`;wireAcctPicker(m,()=>ROUTES.account(m))};
 /* entry points: a map card on Learn, the account row in Profile › Settings, the picker inside Lesson 1.2 (c0l4, classic page) */
-ROUTES.learn=(o=>function(m){o(m);const h=$('h1',m)||m.firstElementChild;const c=`<a class="card tile new-map" href="#/phases" data-keep><b>🗺️ New: the 6-phase course map</b> <span class="small mut">preview of the restructured course · ${acctLabel()} practice account</span></a>`;if(h&&h.closest('.hdr'))h.closest('.hdr').insertAdjacentHTML('afterend',c);else m.insertAdjacentHTML('afterbegin',c)})(ROUTES.learn);
+/* Learner Learn tab is the course map (shell2). The preview banner is gone. Hidden #/learn/units keeps the old accordion for the harness — no banner. */
+
 ROUTES.profile=(o=>function(m,arg){o(m,arg);if(arg)return;const st=$$('.sect',m).find(s=>/Settings/.test(s.textContent));const card=st&&st.nextElementSibling;if(card)card.insertAdjacentHTML('afterbegin',`<div class="kv" id="acctrow"><span>Practice account</span><span><a href="#/account">${acctLabel()} · change</a></span></div>`)})(ROUTES.profile);
 ROUTES.lesson=(o=>function(m,arg){o(m,arg);if(arg!=='c0l4')return;const cl=(location.hash||'').split('/')[3]==='classic';const L=$('.lesson',m);if(cl&&L&&!$('#acctpick',m)){L.insertAdjacentHTML('beforeend',acctPickerHTML());wireAcctPicker(m,()=>{const x=$('#acctpick',m);if(x){x.outerHTML=acctPickerHTML();wireAcctPicker(m)}})}})(ROUTES.lesson);
 /* ---------- B0 fixes R-2 / R-4: one practice account everywhere, old saves included ----------
@@ -8268,8 +8367,14 @@ function pActLine(x){const G=PGAME[x.id];if(!G||!G.steps)return x.ph>=3?'<span c
  return '<span class="mf-act">🕹️ Activity: Practice checks</span>'}
 function mfModTitle(p){return `Module ${p.n}: ${p.t}`}
 const pPrev=x=>x&&x.ph>=2&&!(P&&P.override)&&!PL[x.id];/* B2+: a rebuilt lesson (PL/PGAME) is playable; unbuilt Phase 2+ stays titles-only preview */
-function pRow(x){const st=pState(x);const built=!!PL[x.id];const href=st==='locked'||pPrev(x)?'':pHref(x);const from=pFrom(x);const lock=st==='locked'||pPrev(x);
- return `<li class="mf-concept ${st}" data-id="${x.id}">${href?`<a href="${href}">`:'<span class="mf-concept-main">'}${lock?'🔒 ':''}<b>Core Concept ${x.num}</b> · ${esc(x.t)}${st==='done'?' ✓':''}${href?'</a>':'</span>'}${pActLine(x)}${from.length?`<span class="small mut ph-from">done from your earlier progress</span>`:''}</li>`}
+function pContLabel(nx){if(!nx)return 'Continue';if(nx.old)return nx.t||'Continue';if(nx.boss)return nx.t||'Graduation Exam';const ph=nx.ph||(PLV[(nx.lv||1)-1]||{}).ph||'';return 'Module '+ph+' · Concept '+nx.num+' · '+nx.t}
+function mfWickLine(nx){if(!nx)return 'Nice work. Open the map whenever you’re ready for what’s next.';if(nx.old)return 'Module 2 is complete. Module 3 stays visible and locked until it ships.';if(nx.boss)return 'You’re ready. Take the '+((nx.t||'Graduation Exam'))+'!';if(String(nx.num)==='5.1')return 'Module 2 is open. Start 5.1!';if(String(nx.num)==='1.1')return 'Welcome. Start with Concept 1.1!';return 'Next up: '+nx.num+'. Let’s go!'}
+function mfRing(done,tot,s=44){const p=tot?done/tot:0,w=5,r=(s-w)/2,c=2*Math.PI*r;
+ return `<svg class="mf-ring" data-keep width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" aria-label="${done} of ${tot} concepts done"><circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="${w}"/>${p>0?`<circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" stroke="#fff" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${(c*p).toFixed(2)} ${c}" transform="rotate(-90 ${s/2} ${s/2})"/>`:''}<text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="#fff" font-size="${Math.round(s*.26)}" font-weight="700" font-family="Inter,Segoe UI,sans-serif">${done}/${tot}</text></svg>`}
+function pRow(x,nx){const st=pState(x);const href=st==='locked'||pPrev(x)?'':pHref(x);const from=pFrom(x);const lock=st==='locked'||pPrev(x);
+ const cur=nx&&!nx.old&&!nx.boss&&nx.id===x.id;const cls='mf-concept '+st+(cur?' mf-cur':'');
+ const icon=st==='done'?icn('check',16,'#067647',2.6):lock?icn('lock',15,'currentColor'):icn('play',15,'currentColor');
+ return `<li class="${cls}" data-id="${x.id}" ${cur?'id="mf-cur"':''}><span class="mf-state" aria-hidden="true">${icon}</span><div class="mf-concept-body">${href?`<a href="${href}">`:'<span class="mf-concept-main">'}${lock?'<span class="mf-lock-lab">Locked · </span>':''}<b>Core Concept ${x.num}</b> · ${esc(x.t)}${href?'</a>':'</span>'}${pActLine(x)}${from.length?`<span class="small mut ph-from">done from your earlier progress</span>`:''}${cur?`<a class="btn p sm mf-cur-go" href="${href||pHref(nx)}">${icn('play',14)} Continue</a>`:''}</div></li>`}
 ROUTES.level=(m,arg)=>{const n=+arg;const v=PLV[n-1];if(!v){location.hash='#/phases';return}const p=PHASES[v.ph-1];const open=lvOpen(n);const dn=v.ls.filter(pDone).length;const last=PLV[n]&&PLV[n].ph!==v.ph||!PLV[n];
  m.innerHTML=`<div class="hdr"><div><div class="eyebrow">Module ${p.n} · ${esc(p.t)}</div><h1>Level ${n} · ${esc(v.t)}</h1></div></div>
  ${v.ph>=2&&!(P&&P.override)&&!v.ls.some(x=>PL[x.id])?'<p class="callout ph-preview">🗺️ <b>Coming soon.</b> Module '+v.ph+' concepts are listed so you can see what’s ahead. They unlock when that module ships.</p>':''}
@@ -8287,22 +8392,37 @@ ROUTES.p=(m,arg)=>{const cl=(location.hash||'').split('/')[3]==='classic';/* MF:
  const lvN=x.boss?PLV.filter(v=>v.ph===x.boss).pop().n:x.lv;const v=PLV[lvN-1];const i=x.boss?-1:v.ls.findIndex(y=>y.id===x.id);const nx=x.boss?null:v.ls[i+1];const lastLv=!PLV[lvN]||PLV[lvN].ph!==v.ph;
  const next=nx?pHref(nx):(!x.boss&&lastLv&&PBOSS[v.ph])?'#/p/'+PBOSS[v.ph]:x.boss?(PLV[lvN]?'#/level/'+(lvN+1):null):(PLV[lvN]?'#/level/'+(lvN+1):null);
  const nextT=nx?'Next Concept: '+nx.num:(!x.boss&&lastLv&&PBOSS[v.ph])?'On to the '+PHASE_EXAMS[v.ph-1]:x.boss?'Open Module '+(v.ph+1):'Next concept';
- if(cl||!G){m.innerHTML=`<div class="lesson pl-classic"><div class="eyebrow">Module ${v.ph} · Level ${v.n} · Concept ${l.num}</div><h1>${esc(l.t)}</h1>${G?`<a class="g-playbar noprint" href="#/p/${l.id}">🎮 <b>Play this lesson as a level</b> <span class="small">short steps, instant checks, a boss round</span></a>`:''}${l.body}<div class="take"><b>🔑 Key takeaways</b><ul>${l.take.map(t=>`<li>${t}</li>`).join('')}</ul></div><div class="row"><a class="btn" href="#/level/${v.n}">← Level ${v.n}</a>${next?`<a class="btn p" href="${next}">${nextT} →</a>`:''}</div></div>`;if(typeof GAMEP==='object')m.innerHTML=GAMEP.tx(m.innerHTML);return}
- GAMEP.play(m,l,G,{cc:x.ph===1||x.boss?'c1':'c2',back:'#/level/'+v.n,next,nextT,end:'#/level/'+v.n,endT:'Back to Level '+v.n,onDone:()=>{if(!x.boss)pCarry(x.id)}})};
-/* the map: progress, locks and "continue" */
+ if(cl||!G){m.innerHTML=`<div class="lesson pl-classic"><div class="eyebrow">Module ${v.ph} · Level ${v.n} · Concept ${l.num}</div><h1>${esc(l.t)}</h1>${G?`<a class="g-playbar noprint" href="#/p/${l.id}">🎮 <b>Play this lesson as a level</b> <span class="small">short steps, instant checks, a boss round</span></a>`:''}${l.body}<div class="take"><b>🔑 Key takeaways</b><ul>${l.take.map(t=>`<li>${t}</li>`).join('')}</ul></div><div class="row"><a class="btn" href="#/phases">← Course map</a>${next?`<a class="btn p" href="${next}">${nextT} →</a>`:''}</div></div>`;if(typeof GAMEP==='object')m.innerHTML=GAMEP.tx(m.innerHTML);return}
+ GAMEP.play(m,l,G,{cc:x.ph===1||x.boss?'c1':'c2',back:'#/phases',next:'#/phases',nextT:'Back to the map',end:'#/phases',endT:'Back to the map',onDone:()=>{if(!x.boss)pCarry(x.id)}})};
+/* the map: progress, locks and "continue" — learner home */
 ROUTES.phases=(m)=>{const all=PLS;const dn=all.filter(pDone).length;const nx=pNext();
- m.innerHTML=`<div class="hdr"><div><div class="eyebrow">Your roadmap</div><h1>🗺️ Course Map</h1></div>
-  <div class="row"><a class="btn sm" href="#/arena">← Welcome</a></div></div>
- <p class="mut">${PHASES.length} modules · ${PLV.length} levels · ${all.length} core concepts · ${dn} done. Finish a concept, complete its activity. Ace the Module Graduation Exam to unlock the next module. Locked items stay visible so you can see what’s coming.</p>
- ${nx?`<a class="card tile ph-next" href="${pHref(nx)}"><b>▶ Continue: ${nx.old?esc(nx.t):nx.boss?'🏆 '+esc(nx.t):'Core Concept '+nx.num+' · '+esc(nx.t)}</b>${nx.old?' <span class="small mut">(Modules 3–6 concepts unlock as each module ships)</span>':''}</a>`:''}
+ let due=0;try{due=dueCards().length}catch(e){}
+ const streak=(typeof studyStreak==='function')?studyStreak():0;
+ const wimg=(()=>{try{return (nx&&nx.boss)?WICK_IMG.cheer:WICK_IMG.coach}catch(e){return ''}})();
+ const go=nx?pHref(nx):'#/phases';
+ const lab=pContLabel(nx);
+ const line=mfWickLine(nx);
+ m.innerHTML=`<div class="mf-map">
+ <div class="hdr mf-map-hdr"><div><div class="eyebrow">Your roadmap</div><h1>Course Map</h1><a class="mf-welcome-link" href="#/arena">Welcome</a></div>
+  <div class="mf-stats"><span class="pill">${icn('flame',14)} ${streak}-day streak</span><span class="pill">${icn('spark',14)} ${(P&&P.xp)||0} XP</span><a class="pill" href="#/review">${icn('cards',14)} ${due?due+' cards due':'Daily review'}</a></div></div>
+ <div class="card mf-coach" data-keep>
+  <img class="mf-wick" src="${wimg}" alt="Coach Wick" width="88" height="150">
+  <div class="mf-coach-copy"><b>Coach Wick</b><div class="mf-bubble"><p>${esc(line)}</p></div>
+   ${nx?`<a class="btn p ph-next" href="${go}">${icn('play',16)} Continue · ${esc(lab)}</a>`:''}
+   ${nx&&nx.old?'<p class="small mut mf-coach-note">Modules 3–6 stay visible and unlock as each one ships.</p>':''}
+  </div>
+ </div>
+ <p class="mut mf-map-lead">${PHASES.length} modules · ${PLV.length} levels · ${all.length} core concepts · ${dn} done. Finish a concept, complete its activity. Ace the Module Graduation Exam to unlock the next module.</p>
  ${PHASES.map(p=>{const pl=all.filter(x=>x.ph===p.n);const pd=pl.filter(pDone).length;const openMod=p.n===1||bossDone(p.n-1)||pl.some(pDone)||(P&&P.override);const cur=nx&&(nx.ph===p.n||nx.boss===p.n);
-  return `<section class="card phase mf-mod ${openMod?'':'mf-mod-locked'}" id="ph${p.n}">
-   <div class="mf-mod-h"><b>${openMod?'':'🔒 '}${esc(mfModTitle(p))}</b> <span class="mut small">${esc(p.sub)} · ${pd}/${pl.length}${openMod?'':' · Locked'}</span></div>
-   ${PLV.filter(v=>v.ph===p.n).map(v=>`<div class="level ${lvOpen(v.n)?'':'locked'}" data-lv="${v.n}"><h3>${lvOpen(v.n)?'':'🔒 '}Level ${v.n} · ${esc(v.t)}</h3><ol class="ph-ls mf-ls">${v.ls.map(pRow).join('')}</ol></div>`).join('')}
-   <div class="mf-exam ${bossDone(p.n)?'done':bossOpen(p.n)?'ready':'locked'}">${PBOSS[p.n]?`<a href="${bossOpen(p.n)?('#/p/'+PBOSS[p.n]):('#/level/'+PLV.filter(v=>v.ph===p.n).pop().n)}">${bossDone(p.n)?'✓ ':(!bossOpen(p.n)?'🔒 ':'🏆 ')}${PHASE_EXAMS[p.n-1]}</a><span class="small mut"> · ${bossDone(p.n)?'passed':bossOpen(p.n)?'ready — locks the next module until passed':'Locks the next module until passed'}</span>`:`<span class="mut">🔒 ${PHASE_EXAMS[p.n-1]} · Locks the next module until passed</span>`}</div>
+  return `<section class="card phase mf-mod ${openMod?'':'mf-mod-locked'}${cur?' mf-mod-cur':''}" id="ph${p.n}">
+   <div class="mf-mod-h"><span class="mf-mod-num">${p.n}</span><div class="mf-mod-t"><b>${openMod?'':'🔒 '}${esc(mfModTitle(p))}</b><span class="mf-mod-sub">${esc(p.sub)}${openMod?'':' · Locked'}</span></div>${mfRing(pd,pl.length)}</div>
+   ${PLV.filter(v=>v.ph===p.n).map(v=>`<div class="level mf-lv ${lvOpen(v.n)?'':'locked'}" data-lv="${v.n}"><h3 class="mf-lv-h"><span class="mf-lv-ic">${lvOpen(v.n)?icn('flag',15):icn('lock',14)}</span>${lvOpen(v.n)?'':'Locked · '}Level ${v.n} · ${esc(v.t)}</h3><ol class="ph-ls mf-ls">${v.ls.map(x=>pRow(x,nx)).join('')}</ol></div>`).join('')}
+   <div class="mf-exam ${bossDone(p.n)?'done':bossOpen(p.n)?'ready':'locked'}">${(()=>{const ic=bossDone(p.n)?icn('check',18,'#067647',2.4):icn('trophy',18);const body=`<span class="mf-exam-ic">${ic}</span><span class="mf-exam-t"><b>${PHASE_EXAMS[p.n-1]}</b><span class="small">${bossDone(p.n)?'Passed':'Graduation Exam · '+(bossOpen(p.n)?'Ready — unlocks the next module':'Locks the next module until passed')}</span></span>`;return PBOSS[p.n]?`<a class="mf-exam-inner" href="${bossOpen(p.n)?('#/p/'+PBOSS[p.n]):'#/phases'}">${body}</a>`:`<span class="mf-exam-inner">${body}</span>`;})()}</div>
   </section>`}).join('')}
- <div class="card"><b>📚 Go Deeper shelf</b> <span class="small mut">optional, not graded</span><p class="small">${GO_DEEPER.length} extras for the curious. <a href="#/deeper">Open the shelf →</a></p></div>
- <div class="card small mut">Electives after the core: Options → Futures → Forex.</div>`};
+ <div class="card mf-more"><b>Go Deeper shelf</b> <span class="small mut">optional, not graded</span><p class="small">${GO_DEEPER.length} extras for the curious. <a href="#/deeper">Open the shelf →</a></p></div>
+ <div class="card small mut mf-more">Electives after the core: Options → Futures → Forex.</div></div>`;
+ const fromL=/^#\/(p|lesson|level|mastery)\b/.test(window._mfFromHash||'');
+ requestAnimationFrame(()=>{if(fromL){const el=$('#mf-cur',m)||$('.mf-mod-cur',m);if(el)el.scrollIntoView({block:'center',behavior:'instant'})}else window.scrollTo(0,0)})};
 
 /* Old #/lesson routes respect the new-order lock (QC/Flow 66cc4d9 F-2): before the Phase 1 boss, a lesson that is only a Phase 2+ source
    (e.g. c0l5 = 5.1) doesn't open from a direct link unless it is already done; the old chapter gates still apply on top (app1). */
@@ -8311,7 +8431,7 @@ ROUTES.phases=(m)=>{const all=PLS;const dn=all.filter(pDone).length;const nx=pNe
   m.innerHTML=`<div class="card ph-lock"><h2>🔒 Lesson ${l?l.num:ph.num} ${esc(l?l.t:ph.t)}</h2><p>This concept is part of Module ${ph.ph}. Finish Module 1 and its Graduation Exam first.</p><div class="row">${nx?`<a class="btn p" href="${pHref(nx)}">Continue →</a>`:''}<a class="btn" href="#/phases">Course map</a></div></div>`;return}
  /* Flow c1b7385 #4: a lesson whose chapter is locked shows the chapter lock first, even a Review Gate lesson (c15l4, 20.2 Going live, sits in the
     graduation chapter, which opens after the Final Exam), so it stays closed like c15l1–3 on a fresh profile and after the Phase 1 boss */
- {const l=lessonById(ALIAS&&ALIAS[id]||id);if(l&&!unlocked(l.ch)){m.innerHTML='<div class="card">🔒 This chapter is locked. <a href="#/learn">Back to curriculum</a></div>';return}}
+ {const l=lessonById(ALIAS&&ALIAS[id]||id);if(l&&!unlocked(l.ch)){m.innerHTML='<div class="card">🔒 This chapter is locked. <a href="#/phases">Back to the course map</a></div>';return}}
  return _lessonPh(m,id)}}
 
 /* ---- phase1.js ---- */
@@ -9140,6 +9260,6 @@ window.HELPER_FILES={"README.md":"# Alpaca Paper-Trade Review Helper (read-only)
 
 /* ---- boot.js ---- */
 /* ---------- boot ---------- */
-(function boot(){shell();const a=Store.gget('active');if(a&&profiles().some(p=>p.id===a)){loadProfile(a);if(!location.hash)location.hash=P.last||'#/arena';route()}else showProfiles()})();
+(function boot(){shell();const a=Store.gget('active');if(a&&profiles().some(p=>p.id===a)){loadProfile(a);if(!location.hash)location.hash=P.last?(typeof mfMapHash==='function'?mfMapHash(P.last):P.last):'#/arena';route()}else showProfiles()})();
 
 </script></body></html>
